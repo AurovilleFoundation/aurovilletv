@@ -250,7 +250,7 @@ class AppUtils {
     ScaffoldMessenger.of(context).showSnackBar(snackdemo);
   }
 
-  showMaterialBanner(
+  void showMaterialBanner(
     BuildContext context, {
     required String msg,
     IconData? icon,

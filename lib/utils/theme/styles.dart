@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'colors.dart';
 
 class AppStyle {
-  get systemUiOverlayStyle => const SystemUiOverlayStyle(
+  SystemUiOverlayStyle get systemUiOverlayStyle => const SystemUiOverlayStyle(
     statusBarBrightness: Brightness.dark, //iOS top bar color
     statusBarColor: Colors.transparent, //Android top bar color
     statusBarIconBrightness: Brightness.dark, //Android top bar icons

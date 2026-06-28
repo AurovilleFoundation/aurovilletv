@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
       title: AppStrings.appName,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.themeColor),
+        scaffoldBackgroundColor: AppColors.scaffoldBackgroundColor,
         useMaterial3: true,
         textTheme: GoogleFonts.cormorantGaramondTextTheme(
           ThemeData.light().textTheme.copyWith(),
