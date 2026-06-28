@@ -58,37 +58,22 @@ class MyTextField extends StatelessWidget {
       onChanged: (value) => (onChanged != null) ? onChanged!(value) : null,
       decoration: InputDecoration(
         prefixIcon: (prefixIcon != null)
-            ? Icon(
-                prefixIcon,
-                color: AppColors.textHintColor,
-              )
+            ? Icon(prefixIcon, color: AppColors.textHintColor)
             : null,
         suffixIcon: (suffixIcon != null)
-            ? Icon(
-                suffixIcon,
-                color: AppColors.textHintColor,
-              )
+            ? Icon(suffixIcon, color: AppColors.textHintColor)
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
-          borderSide: const BorderSide(
-            color: AppColors.themeColor,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.themeColor, width: 2),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
-          borderSide: const BorderSide(
-            color: AppColors.themeColor,
-            width: 1,
-          ),
+          borderSide: const BorderSide(color: AppColors.themeColor, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadius),
-          borderSide: const BorderSide(
-            color: AppColors.themeColor,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.themeColor, width: 2),
         ),
         filled: true,
         hintText: hintText,
@@ -131,9 +116,7 @@ class MyMultiLineTextField extends StatelessWidget {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColors.inputBackgroundColor,
-        ),
+        border: Border.all(color: AppColors.darkColor),
         borderRadius: const BorderRadius.all(Radius.circular(4)),
       ),
       child: TextField(
@@ -147,26 +130,26 @@ class MyMultiLineTextField extends StatelessWidget {
         maxLines: maxLines,
         minLines: minLines,
         autofocus: autofocus,
-        buildCounter: (context,
-                {required currentLength,
-                required isFocused,
-                required maxLength}) =>
-            Container(),
+        buildCounter:
+            (
+              context, {
+              required currentLength,
+              required isFocused,
+              required maxLength,
+            }) => Container(),
         decoration: InputDecoration(
-            prefixIcon: (prefixIcon != null)
-                ? Icon(
-                    prefixIcon,
-                    color: Colors.grey,
-                  )
-                : null,
-            border: InputBorder.none,
-            filled: true,
-            hintText: hintText,
-            labelText: (labelText.isNotEmpty) ? labelText : null,
-            hintStyle: AppStyle.textStyleHint,
-            //fillColor: Theme.of(context).scaffoldBackgroundColor,
-            fillColor: Colors.white,
-            counterStyle: const TextStyle(color: Colors.white)),
+          prefixIcon: (prefixIcon != null)
+              ? Icon(prefixIcon, color: Colors.grey)
+              : null,
+          border: InputBorder.none,
+          filled: true,
+          hintText: hintText,
+          labelText: (labelText.isNotEmpty) ? labelText : null,
+          hintStyle: AppStyle.textStyleHint,
+          //fillColor: Theme.of(context).scaffoldBackgroundColor,
+          fillColor: Colors.white,
+          counterStyle: const TextStyle(color: Colors.white),
+        ),
       ),
     );
   }

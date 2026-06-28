@@ -28,9 +28,7 @@ class MyElevatedButton extends StatelessWidget {
         onPressed: () => onPressed(),
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppColors.primaryColor(context),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         child: Text(
           text,
@@ -70,22 +68,21 @@ class MyTextButton extends StatelessWidget {
       width: (isFullWidth) ? double.infinity : null,
       //height: _buttonHeight,
       child: TextButton(
-          onPressed: () => onPressed(),
-          style: TextButton.styleFrom(
-            backgroundColor: backgroundColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
-            ),
+        onPressed: () => onPressed(),
+        style: TextButton.styleFrom(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            letterSpacing: .5,
+            color: textColor,
+            fontWeight: FontWeight.bold,
           ),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              letterSpacing: .5,
-              color: textColor,
-              fontWeight: FontWeight.bold,
-            ),
-          )),
+        ),
+      ),
     );
   }
 }
@@ -118,14 +115,9 @@ class MyRoundIconButton extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             backgroundColor: backgroundColor,
           ),
-          child: Icon(
-            icon,
-            color: iconColor,
-          ),
+          child: Icon(icon, color: iconColor),
         ),
-        const SizedBox(
-          height: 8,
-        ),
+        const SizedBox(height: 8),
         Text(
           title,
           style: AppStyle.textStyleMedium.copyWith(
@@ -172,13 +164,11 @@ class MoreItemButton extends StatelessWidget {
           label: Text(
             title,
             style: AppStyle.textStyleRegular.copyWith(
-                color: (isComingSoon) ? AppColors.textColorDisabled : null),
+              color: (isComingSoon) ? AppColors.textColorDisabled : null,
+            ),
             textAlign: TextAlign.center,
           ),
-          icon: Icon(
-            icon,
-            color: (isComingSoon) ? AppColors.themeColor.shade100 : iconColor,
-          ),
+          icon: Icon(icon, color: iconColor),
         ),
       ],
     );
@@ -222,9 +212,7 @@ class MyOutlinedButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           side: BorderSide(width: 1, color: borderColor ?? textColor),
           backgroundColor: backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         onPressed: () => onPressed(),
         child: Row(
@@ -281,18 +269,16 @@ class MyElevatedIconButton extends StatelessWidget {
         onPressed: () => onPressed(),
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        icon: Icon(
-          icon,
-          color: iconColor,
-        ),
+        icon: Icon(icon, color: iconColor),
         label: Text(
           text,
           style: AppStyle.textStyleMedium.copyWith(
-              fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+            fontSize: 16,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -318,24 +304,19 @@ class MoreIconButton extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: () => onPressed(),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.themeColor.shade50,
+          backgroundColor: AppColors.themeColor,
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
         iconAlignment: IconAlignment.end,
-        icon: Icon(
-          icon,
-          color: AppColors.themeColor,
-          size: 12,
-        ),
+        icon: Icon(icon, color: AppColors.themeColor, size: 12),
         label: Text(
           text,
           style: AppStyle.textStyleMedium.copyWith(
-              fontSize: 10,
-              color: AppColors.themeColor,
-              fontWeight: FontWeight.bold),
+            fontSize: 10,
+            color: AppColors.themeColor,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -362,17 +343,13 @@ class MySquareIconButton extends StatelessWidget {
     return SizedBox(
       //height: _buttonHeight,
       child: ElevatedButton(
-          onPressed: () => onPressed(),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: Icon(
-            icon,
-            color: iconColor,
-          )),
+        onPressed: () => onPressed(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: Icon(icon, color: iconColor),
+      ),
     );
   }
 }
@@ -420,10 +397,7 @@ class LocalAuthButton extends StatelessWidget {
         child: Stack(
           children: [
             if (icon != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: icon!,
-              ),
+              Padding(padding: const EdgeInsets.only(left: 4), child: icon!),
             Center(
               child: Text(
                 text,

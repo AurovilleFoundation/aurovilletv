@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.themeColor),
         useMaterial3: true,
-        textTheme: GoogleFonts.montserratTextTheme(
+        textTheme: GoogleFonts.cormorantGaramondTextTheme(
           ThemeData.light().textTheme.copyWith(),
         ),
         dialogTheme: const DialogThemeData(

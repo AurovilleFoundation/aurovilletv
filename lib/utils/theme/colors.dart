@@ -2,38 +2,34 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   /// Light Theme Colors
-  static const themePrimaryLightColor = Color(0xFF9B543E);
-  static const themeSecondaryLightColor = "";
-  static const themeAscentLightColor = "";
+  static const themePrimaryLightColor = themeColor;
+  static const themeSecondaryLightColor = earthColor;
+  static const themeAscentLightColor = goldenColor;
 
   /// Dark Theme Colors
-  static const themePrimaryDarkColor = "";
-  static const themeSecondaryDarkColor = "";
-  static const themeAscentDarkColor = "";
+  static const themePrimaryDarkColor = themeColor;
+  static const themeSecondaryDarkColor = earthColor;
+  static const themeAscentDarkColor = goldenColor;
 
-  //static const themeColor = Color(0xFF9B543E);
-  static const MaterialColor themeColor = Colors.teal;
-  static const themeColorSecondary = themeColor;
+  static const themeColor = Color(0xFFC96A3A);
+  static const beigeColor = Color(0xFFF5EFE8);
+  static const earthColor = Color(0xFF6B4A32);
+  static const goldenColor = Color(0xFFD6A84A);
+  static const darkColor = Color(0xFF2E2E2E);
+  static const lightColor = Color(0xFFFFFFFF);
 
   static primaryColor(BuildContext context) => themeColor;
 
   // Background Color
-  static const scaffoldBackgroundColor = Colors.white;
-  static const backgroundLight = Colors.white;
-  static const backgroundDark = Color(0xFF48D5C7);
-
-  static const webBgColorPrimary = Color(0xFF212332);
-  static const webBgColorSecondary = Color(0xFF2A2D3E);
-
-  static const toolbarForegroundColor = Colors.white;
-  static const inputBackgroundColor = Colors.white;
+  static const scaffoldBackgroundColor = beigeColor;
+  static const backgroundLight = beigeColor;
+  static const backgroundDark = darkColor;
 
   // Text Color
-  //static textPrimaryColor() => textColorDark;
-  static const textPrimaryColor = textColorDark;
-  static const textColorDark = Colors.black;
-  static const textColorLightDark = Color(0xFF494949);
-  static const textColorLight = Colors.white;
+  static const textPrimaryColor = darkColor;
+  static const textColorDark = darkColor;
+  static const textColorLightDark = beigeColor;
+  static const textColorLight = beigeColor;
   static const textColorDisabled = Colors.grey;
-  static const textHintColor = Color(0xFFACACAC);
+  static const textHintColor = earthColor;
 }
