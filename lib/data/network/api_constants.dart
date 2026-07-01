@@ -1,1 +1,4 @@
-class APIConstants {}
+class ApiConstants {
+  ApiConstants._();
+  static const String baseUrl = "";
+}

@@ -8,12 +8,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-import '../data/models/enums.dart';
 import 'app_constants.dart';
 import 'theme/colors.dart';
 import 'theme/styles.dart';
