@@ -45,7 +45,7 @@ class DBManager {
 
     // Categories Table
     await db.execute('''
-    CREATE TABLE categories (
+    CREATE TABLE event_categories (
       id INTEGER PRIMARY KEY,
       name TEXT NOT NULL
     )

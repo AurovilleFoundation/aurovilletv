@@ -3,6 +3,7 @@ import 'package:aurovilletv/data/network/dio_client.dart';
 import 'package:dio/dio.dart';
 
 import '../../models/video_model.dart';
+import '../../models/live_stream_model.dart';
 
 class VideoApiServiceImpl implements VideoApiService {
   final DioClient dioClient;
@@ -46,6 +47,31 @@ class VideoApiServiceImpl implements VideoApiService {
       );
 
       return _parseVideos(response.data);
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
+    }
+  }
+
+  @override
+  Future<LiveStreamModel> getLiveStream({required String apiKey, required String apiSecret}) async {
+    try {
+      final response = await _dio.get(
+        "https://aiis.auroville.org/api/method/register_of_residence.media.api.atv.live",
+        options: Options(
+          headers: {
+            "Authorization": "token $apiKey:$apiSecret",
+          },
+        ),
+      );
+
+      final data = response.data;
+      if (data is Map<String, dynamic> && data.containsKey('message')) {
+        return LiveStreamModel.fromMap(data['message'] as Map<String, dynamic>);
+      } else if (data is Map<String, dynamic>) {
+        return LiveStreamModel.fromMap(data);
+      } else {
+        throw Exception("Invalid API response format");
+      }
     } on DioException catch (e) {
       throw Exception(_getErrorMessage(e));
     }

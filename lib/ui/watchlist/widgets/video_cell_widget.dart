@@ -56,7 +56,7 @@ class VideoCellWidget extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             image,
-            Container(color: Colors.black.withOpacity(.15)),
+            Container(color: Colors.black.withValues(alpha: 0.15)),
             _videoIconWidget(),
           ],
         ),

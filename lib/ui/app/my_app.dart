@@ -7,6 +7,8 @@ import 'package:aurovilletv/ui/main/main_screen.dart';
 import 'package:aurovilletv/ui/watchlist/bloc/watchlist_bloc.dart';
 import 'package:aurovilletv/utils/dbmanager.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
+import 'package:aurovilletv/ui/live/cubit/live_cubit.dart';
+import 'package:aurovilletv/utils/secure_storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -33,6 +35,12 @@ class MyApp extends StatelessWidget {
           create: (_) =>
               WatchListBloc(dbManager: getIt<DBManager>())
                 ..add(const LoadWatchList()),
+        ),
+        BlocProvider(
+          create: (_) => LiveCubit(
+            apiService: getIt<VideoApiService>(),
+            secureStorage: getIt<SecureStorageManager>(),
+          ),
         ),
       ],
       child: MaterialApp(

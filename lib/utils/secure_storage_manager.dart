@@ -4,9 +4,7 @@ class SecureStorageManager {
   late final FlutterSecureStorage _storage;
 
   SecureStorageManager() {
-    _storage = const FlutterSecureStorage(
-      aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    );
+    _storage = const FlutterSecureStorage();
   }
 
   Future updateValue(String key, String? value) async {
