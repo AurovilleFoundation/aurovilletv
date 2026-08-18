@@ -209,18 +209,6 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            TextButton.icon(
-              onPressed: () {
-                context.read<LiveCubit>().toggleMockMode(true);
-              },
-              icon: const Icon(Icons.play_circle_outline_rounded),
-              label: const Text("Launch Demo Stream (Mock Mode)"),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.earthColor,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-            ),
           ],
         ),
       ),
@@ -291,13 +279,6 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            TextButton(
-              onPressed: () {
-                context.read<LiveCubit>().toggleMockMode(true);
-              },
-              child: const Text("Switch to Demo Mode"),
-            ),
           ],
         ),
       ),
@@ -317,39 +298,6 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isMocked)
-            Container(
-              width: double.infinity,
-              color: AppColors.goldenColor.withValues(alpha: 0.15),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline_rounded, size: 18, color: AppColors.earthColor),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      "Running in Demo Mode (Mock data).",
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.earthColor,
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      context.read<LiveCubit>().toggleMockMode(false);
-                    },
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      foregroundColor: AppColors.themeColor,
-                    ),
-                    child: const Text("Disable Demo"),
-                  ),
-                ],
-              ),
-            ),
           // Video Player Container
           AspectRatio(
             aspectRatio: 16 / 9,
@@ -708,25 +656,6 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                     ),
                     obscureText: true,
                     validator: (v) => (v == null || v.trim().isEmpty) ? "API Secret is required" : null,
-                  ),
-                  const SizedBox(height: 16),
-                  // Mock toggle inside dialog as shortcut
-                  StatefulBuilder(
-                    builder: (context, setDialogState) {
-                      return CheckboxListTile(
-                        title: const Text("Use Demo Stream Mode"),
-                        subtitle: const Text("Simulates connection without keys"),
-                        value: liveCubit.isMockMode,
-                        contentPadding: EdgeInsets.zero,
-                        onChanged: (val) {
-                          if (val != null) {
-                            liveCubit.toggleMockMode(val);
-                            setDialogState(() {});
-                            Navigator.of(context).pop();
-                          }
-                        },
-                      );
-                    },
                   ),
                 ],
               ),

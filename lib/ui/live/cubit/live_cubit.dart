@@ -40,7 +40,7 @@ class LiveCubit extends Cubit<LiveState> {
           status: "Live",
           title: "Auroville Charter Day & Matrimandir Meditations",
           description: "Live broadcasting of the annual meditations at the Matrimandir amphitheatre. Connecting Aurovillians around the globe.",
-          streamUrl: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8", // public HLS stream URL for testing
+          streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // public MP4 stream URL for testing on Chrome Web
           viewerCount: 342,
           thumbnail: "assets/images/live_banner.jpg",
         ),
