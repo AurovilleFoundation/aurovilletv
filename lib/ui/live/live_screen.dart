@@ -3,6 +3,7 @@ import 'package:aurovilletv/ui/live/cubit/live_cubit.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:video_player/video_player.dart';
 
 class LiveScreen extends StatefulWidget {
   const LiveScreen({super.key});
@@ -16,6 +17,10 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
   bool _isPlaying = true;
   bool _isMuted = false;
 
+  VideoPlayerController? _videoController;
+  String? _currentStreamUrl;
+  bool _isPlayerInitialized = false;
+
   @override
   void initState() {
     super.initState();
@@ -25,9 +30,88 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
     )..repeat(reverse: true);
   }
 
+  void _initializePlayer(String url) async {
+    if (url.isEmpty) {
+      setState(() {
+        _videoController = null;
+        _isPlayerInitialized = false;
+        _currentStreamUrl = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _isPlayerInitialized = false;
+      _currentStreamUrl = url;
+    });
+
+    final oldController = _videoController;
+    final newController = VideoPlayerController.networkUrl(Uri.parse(url));
+    _videoController = newController;
+
+    try {
+      await newController.initialize();
+      if (_videoController == newController) {
+        setState(() {
+          _isPlayerInitialized = true;
+        });
+        newController.setVolume(_isMuted ? 0.0 : 1.0);
+        newController.setLooping(true);
+        if (_isPlaying) {
+          newController.play();
+        }
+      } else {
+        newController.dispose();
+      }
+    } catch (e) {
+      debugPrint("Error initializing video player: $e");
+      if (_videoController == newController) {
+        setState(() {
+          _isPlayerInitialized = false;
+        });
+      }
+      newController.dispose();
+    }
+
+    if (oldController != null) {
+      await oldController.dispose();
+    }
+  }
+
+  void _togglePlay() {
+    if (_videoController == null || !_isPlayerInitialized) {
+      setState(() {
+        _isPlaying = !_isPlaying;
+      });
+      return;
+    }
+    setState(() {
+      _isPlaying = !_isPlaying;
+      if (_isPlaying) {
+        _videoController?.play();
+      } else {
+        _videoController?.pause();
+      }
+    });
+  }
+
+  void _toggleMute() {
+    if (_videoController == null || !_isPlayerInitialized) {
+      setState(() {
+        _isMuted = !_isMuted;
+      });
+      return;
+    }
+    setState(() {
+      _isMuted = !_isMuted;
+      _videoController?.setVolume(_isMuted ? 0.0 : 1.0);
+    });
+  }
+
   @override
   void dispose() {
     _pulseController.dispose();
+    _videoController?.dispose();
     super.dispose();
   }
 
@@ -221,6 +305,12 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildLiveContent(BuildContext context, LiveStreamModel liveStream, bool isMocked) {
+    if (liveStream.streamUrl != _currentStreamUrl) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initializePlayer(liveStream.streamUrl);
+      });
+    }
+
     final statusColor = liveStream.status.toLowerCase() == 'live' ? Colors.red : Colors.grey;
 
     return SingleChildScrollView(
@@ -268,28 +358,42 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Player thumbnail / backdrop
-                  Opacity(
-                    opacity: _isPlaying ? 0.8 : 0.4,
-                    child: Image.asset(
-                      "assets/images/live_banner.jpg", // fallback
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, _, __) {
-                        return Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.black87, AppColors.earthColor],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                  // Video Player or fallback thumbnail
+                  _videoController != null && _isPlayerInitialized
+                      ? Center(
+                          child: AspectRatio(
+                            aspectRatio: _videoController!.value.aspectRatio,
+                            child: VideoPlayer(_videoController!),
                           ),
-                          child: const Center(
-                            child: Icon(Icons.live_tv_rounded, size: 64, color: Colors.white24),
+                        )
+                      : Opacity(
+                          opacity: _isPlaying ? 0.8 : 0.4,
+                          child: Image.asset(
+                            "assets/images/live_banner.jpg", // fallback
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, _, __) {
+                              return Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.black87, AppColors.earthColor],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                ),
+                                child: const Center(
+                                  child: Icon(Icons.live_tv_rounded, size: 64, color: Colors.white24),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ),
+                  // Show loading spinner if controller is initializing
+                  if (_videoController != null && !_isPlayerInitialized)
+                    const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.themeColor),
+                      ),
                     ),
-                  ),
                   // Live badge pulsing overlay
                   Positioned(
                     top: 12,
@@ -353,7 +457,7 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                     Center(
                       child: IconButton(
                         icon: const Icon(Icons.play_arrow_rounded, size: 64, color: Colors.white),
-                        onPressed: () => setState(() => _isPlaying = true),
+                        onPressed: _togglePlay,
                       ),
                     ),
                   // Bottom controls overlay
@@ -377,14 +481,14 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                               _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                               color: Colors.white,
                             ),
-                            onPressed: () => setState(() => _isPlaying = !_isPlaying),
+                            onPressed: _togglePlay,
                           ),
                           IconButton(
                             icon: Icon(
                               _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
                               color: Colors.white,
                             ),
-                            onPressed: () => setState(() => _isMuted = !_isMuted),
+                            onPressed: _toggleMute,
                           ),
                           const Spacer(),
                           const Text(
