@@ -30,16 +30,6 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
     )..repeat(reverse: true);
   }
 
-  void _videoListener() {
-    if (_videoController == null) return;
-    final isPlaying = _videoController!.value.isPlaying;
-    if (isPlaying != _isPlaying) {
-      setState(() {
-        _isPlaying = isPlaying;
-      });
-    }
-  }
-
   void _initializePlayer(String url) async {
     if (url.isEmpty) {
       setState(() {
@@ -56,17 +46,12 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
     });
 
     final oldController = _videoController;
-    if (oldController != null) {
-      oldController.removeListener(_videoListener);
-    }
-    
     final newController = VideoPlayerController.networkUrl(Uri.parse(url));
     _videoController = newController;
 
     try {
       await newController.initialize();
       if (_videoController == newController) {
-        newController.addListener(_videoListener);
         setState(() {
           _isPlayerInitialized = true;
         });
@@ -101,19 +86,11 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
       return;
     }
     setState(() {
-      if (_videoController!.value.isPlaying) {
-        _videoController?.pause();
-        _isPlaying = false;
+      _isPlaying = !_isPlaying;
+      if (_isPlaying) {
+        _videoController?.play();
       } else {
-        final isLiveStream = _currentStreamUrl?.contains(".m3u8") ?? false;
-        if (isLiveStream) {
-          // For HLS live streams: re-initialize the stream to catch up to the live edge and prevent buffer stalls.
-          _isPlaying = true;
-          _initializePlayer(_currentStreamUrl ?? '');
-        } else {
-          _videoController?.play();
-          _isPlaying = true;
-        }
+        _videoController?.pause();
       }
     });
   }
@@ -134,7 +111,6 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _pulseController.dispose();
-    _videoController?.removeListener(_videoListener);
     _videoController?.dispose();
     super.dispose();
   }
@@ -332,13 +308,10 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                 children: [
                   // Video Player or fallback thumbnail
                   _videoController != null && _isPlayerInitialized
-                      ? GestureDetector(
-                          onTap: _togglePlay,
-                          child: Center(
-                            child: AspectRatio(
-                              aspectRatio: _videoController!.value.aspectRatio,
-                              child: VideoPlayer(_videoController!),
-                            ),
+                      ? Center(
+                          child: AspectRatio(
+                            aspectRatio: _videoController!.value.aspectRatio,
+                            child: VideoPlayer(_videoController!),
                           ),
                         )
                       : Opacity(
@@ -433,22 +406,6 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                       child: IconButton(
                         icon: const Icon(Icons.play_arrow_rounded, size: 64, color: Colors.white),
                         onPressed: _togglePlay,
-                      ),
-                    ),
-                  // Progress Bar (YouTube style)
-                  if (_videoController != null && _isPlayerInitialized && _videoController!.value.duration.inSeconds > 0)
-                    Positioned(
-                      bottom: 46,
-                      left: 0,
-                      right: 0,
-                      child: VideoProgressIndicator(
-                        _videoController!,
-                        allowScrubbing: true,
-                        colors: const VideoProgressColors(
-                          playedColor: Colors.red,
-                          bufferedColor: Colors.white54,
-                          backgroundColor: Colors.white24,
-                        ),
                       ),
                     ),
                   // Bottom controls overlay
