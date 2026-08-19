@@ -30,6 +30,16 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
     )..repeat(reverse: true);
   }
 
+  void _videoListener() {
+    if (_videoController == null) return;
+    final isPlaying = _videoController!.value.isPlaying;
+    if (isPlaying != _isPlaying) {
+      setState(() {
+        _isPlaying = isPlaying;
+      });
+    }
+  }
+
   void _initializePlayer(String url) async {
     if (url.isEmpty) {
       setState(() {
@@ -46,14 +56,20 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
     });
 
     final oldController = _videoController;
+    if (oldController != null) {
+      oldController.removeListener(_videoListener);
+    }
+    
     final newController = VideoPlayerController.networkUrl(Uri.parse(url));
     _videoController = newController;
 
     try {
       await newController.initialize();
       if (_videoController == newController) {
+        newController.addListener(_videoListener);
         setState(() {
           _isPlayerInitialized = true;
+          _isPlaying = newController.value.isPlaying;
         });
         newController.setVolume(_isMuted ? 0.0 : 1.0);
         newController.setLooping(true);
@@ -86,11 +102,12 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
       return;
     }
     setState(() {
-      _isPlaying = !_isPlaying;
-      if (_isPlaying) {
-        _videoController?.play();
-      } else {
+      if (_videoController!.value.isPlaying) {
         _videoController?.pause();
+        _isPlaying = false;
+      } else {
+        _videoController?.play();
+        _isPlaying = true;
       }
     });
   }
@@ -111,6 +128,7 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _pulseController.dispose();
+    _videoController?.removeListener(_videoListener);
     _videoController?.dispose();
     super.dispose();
   }
@@ -308,10 +326,13 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                 children: [
                   // Video Player or fallback thumbnail
                   _videoController != null && _isPlayerInitialized
-                      ? Center(
-                          child: AspectRatio(
-                            aspectRatio: _videoController!.value.aspectRatio,
-                            child: VideoPlayer(_videoController!),
+                      ? GestureDetector(
+                          onTap: _togglePlay,
+                          child: Center(
+                            child: AspectRatio(
+                              aspectRatio: _videoController!.value.aspectRatio,
+                              child: VideoPlayer(_videoController!),
+                            ),
                           ),
                         )
                       : Opacity(
@@ -406,6 +427,22 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                       child: IconButton(
                         icon: const Icon(Icons.play_arrow_rounded, size: 64, color: Colors.white),
                         onPressed: _togglePlay,
+                      ),
+                    ),
+                  // Progress Bar (YouTube style)
+                  if (_videoController != null && _isPlayerInitialized)
+                    Positioned(
+                      bottom: 46,
+                      left: 0,
+                      right: 0,
+                      child: VideoProgressIndicator(
+                        _videoController!,
+                        allowScrubbing: true,
+                        colors: const VideoProgressColors(
+                          playedColor: Colors.red,
+                          bufferedColor: Colors.white54,
+                          backgroundColor: Colors.white24,
+                        ),
                       ),
                     ),
                   // Bottom controls overlay
