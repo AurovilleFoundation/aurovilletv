@@ -15,7 +15,7 @@ class LiveScreen extends StatefulWidget {
 class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   bool _isPlaying = true;
-  bool _isMuted = false;
+  bool _isMuted = true; // Muted by default to satisfy browser autoplay policies
 
   VideoPlayerController? _videoController;
   String? _currentStreamUrl;
