@@ -69,7 +69,6 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
         newController.addListener(_videoListener);
         setState(() {
           _isPlayerInitialized = true;
-          _isPlaying = newController.value.isPlaying;
         });
         newController.setVolume(_isMuted ? 0.0 : 1.0);
         newController.setLooping(true);
