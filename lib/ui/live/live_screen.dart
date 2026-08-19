@@ -106,14 +106,14 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
         _videoController?.pause();
         _isPlaying = false;
       } else {
-        _videoController?.play();
-        _isPlaying = true;
-        
-        // Fix for HLS live stream freeze on play/pause resume:
-        // Seeking back by 200ms forces the browser's media buffer to re-evaluate and start streaming again instantly.
-        final currentPos = _videoController!.value.position;
-        if (currentPos.inMilliseconds > 200) {
-          _videoController?.seekTo(currentPos - const Duration(milliseconds: 200));
+        final duration = _videoController!.value.duration;
+        if (duration.inSeconds == 0) {
+          // For HLS live streams: re-initialize the stream to catch up to the live edge and prevent buffer stalls.
+          _isPlaying = true;
+          _initializePlayer(_currentStreamUrl ?? '');
+        } else {
+          _videoController?.play();
+          _isPlaying = true;
         }
       }
     });
