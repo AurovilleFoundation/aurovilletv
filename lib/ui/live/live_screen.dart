@@ -108,6 +108,13 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
       } else {
         _videoController?.play();
         _isPlaying = true;
+        
+        // Fix for HLS live stream freeze on play/pause resume:
+        // Seeking back by 200ms forces the browser's media buffer to re-evaluate and start streaming again instantly.
+        final currentPos = _videoController!.value.position;
+        if (currentPos.inMilliseconds > 200) {
+          _videoController?.seekTo(currentPos - const Duration(milliseconds: 200));
+        }
       }
     });
   }
@@ -430,7 +437,7 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                       ),
                     ),
                   // Progress Bar (YouTube style)
-                  if (_videoController != null && _isPlayerInitialized)
+                  if (_videoController != null && _isPlayerInitialized && _videoController!.value.duration.inSeconds > 0)
                     Positioned(
                       bottom: 46,
                       left: 0,
