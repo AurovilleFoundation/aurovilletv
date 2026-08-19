@@ -106,8 +106,8 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
         _videoController?.pause();
         _isPlaying = false;
       } else {
-        final duration = _videoController!.value.duration;
-        if (duration.inSeconds == 0) {
+        final isLiveStream = _currentStreamUrl?.contains(".m3u8") ?? false;
+        if (isLiveStream) {
           // For HLS live streams: re-initialize the stream to catch up to the live edge and prevent buffer stalls.
           _isPlaying = true;
           _initializePlayer(_currentStreamUrl ?? '');
