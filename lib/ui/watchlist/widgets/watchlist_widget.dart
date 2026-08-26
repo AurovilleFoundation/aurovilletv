@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/watchlist_bloc.dart';
+import '../../video_player/video_player_screen.dart';
 import 'video_cell_widget.dart';
 
 class WatchListWidget extends StatelessWidget {
@@ -71,7 +72,12 @@ class WatchListWidget extends StatelessWidget {
                   child: VideoCellWidget(
                     video: video,
                     onTap: () {
-                      // TODO:
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => VideoPlayerScreen(video: video),
+                        ),
+                      );
                     },
                   ),
                 );

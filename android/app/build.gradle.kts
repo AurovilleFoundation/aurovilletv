@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "org.auroville.tv"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

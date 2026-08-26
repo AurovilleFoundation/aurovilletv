@@ -12,7 +12,11 @@ class SecureStorageManager {
   }
 
   Future<String?> getValue(String key) async {
-    return await _storage.read(key: key);
+    try {
+      return await _storage.read(key: key);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future updateBool(String key, bool value) async {

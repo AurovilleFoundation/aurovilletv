@@ -6,7 +6,7 @@ class VideoModel extends Equatable {
   final String description;
   final String videoUrl;
   final String thumbnail;
-  final int categoryId;
+  final String categoryId;
   final DateTime dateTime;
   final bool featured;
   final int viewCount;
@@ -29,7 +29,7 @@ class VideoModel extends Equatable {
     String? description,
     String? videoUrl,
     String? thumbnail,
-    int? categoryId,
+    String? categoryId,
     DateTime? dateTime,
     bool? featured,
     int? viewCount,
@@ -63,15 +63,43 @@ class VideoModel extends Equatable {
 
   factory VideoModel.fromMap(Map<String, dynamic> map) {
     return VideoModel(
-      id: map['id'] as String,
-      title: map['title'] as String,
-      description: map['description'] as String,
-      videoUrl: map['video_url'] as String,
-      thumbnail: map['thumbnail'] as String,
-      categoryId: map['category_id'] as int,
-      dateTime: DateTime.parse(map['date_time'] as String),
-      featured: (map['featured'] as int) == 1,
-      viewCount: map['view_count'] as int,
+      id: map['id'].toString(),
+      title: (map['title'] ?? '') as String,
+      description: (map['description'] ?? '') as String,
+      videoUrl: (map['video_url'] ?? '') as String,
+      thumbnail: (map['thumbnail'] ?? '') as String,
+      categoryId: (map['category_id'] ?? '').toString(),
+      dateTime: map['date_time'] != null 
+          ? DateTime.parse(map['date_time'] as String)
+          : DateTime.now(),
+      featured: map['featured'] == 1 || map['featured'] == true,
+      viewCount: (map['view_count'] ?? 0) as int,
+    );
+  }
+
+  factory VideoModel.fromApi(Map<String, dynamic> map) {
+    // Parse publish_date (API uses "publish_date": "2026-07-24 14:00:00")
+    DateTime date = DateTime.now();
+    if (map['publish_date'] != null) {
+      try {
+        date = DateTime.parse(map['publish_date'] as String);
+      } catch (_) {}
+    } else if (map['created_at'] != null) {
+      try {
+        date = DateTime.parse(map['created_at'] as String);
+      } catch (_) {}
+    }
+
+    return VideoModel(
+      id: map['id'].toString(),
+      title: (map['title'] ?? '') as String,
+      description: (map['description'] ?? '') as String,
+      videoUrl: (map['video_url'] ?? '') as String,
+      thumbnail: (map['thumbnail'] ?? '') as String,
+      categoryId: (map['category'] ?? '').toString(),
+      dateTime: date,
+      featured: map['featured'] == 1 || map['featured'] == true,
+      viewCount: (map['view_count'] ?? 0) as int,
     );
   }
 

@@ -13,9 +13,6 @@ class LiveCubit extends Cubit<LiveState> {
 
   static const String apiKeyStoreKey = "atv_live_api_key";
   static const String apiSecretStoreKey = "atv_live_api_secret";
-  static const String mockModeStoreKey = "atv_live_mock_mode";
-
-  bool _isMockMode = false;
 
   LiveCubit({required this.apiService, required this.secureStorage})
       : super(const LiveInitial()) {
@@ -23,31 +20,11 @@ class LiveCubit extends Cubit<LiveState> {
   }
 
   Future<void> _init() async {
-    _isMockMode = await secureStorage.getBool(mockModeStoreKey);
     await loadLiveStatus();
   }
 
-  bool get isMockMode => _isMockMode;
-
   Future<void> loadLiveStatus() async {
     emit(const LiveLoading());
-
-    if (_isMockMode) {
-      // Return simulated live data
-      await Future.delayed(const Duration(seconds: 1));
-      emit(LiveLoaded(
-        liveStream: const LiveStreamModel(
-          status: "Live",
-          title: "Auroville Charter Day & Matrimandir Meditations",
-          description: "Live broadcasting of the annual meditations at the Matrimandir amphitheatre. Connecting Aurovillians around the globe.",
-          streamUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // public MP4 stream URL for testing on Chrome Web
-          viewerCount: 342,
-          thumbnail: "assets/images/live_banner.jpg",
-        ),
-        isMocked: true,
-      ));
-      return;
-    }
 
     try {
       var apiKey = await secureStorage.getValue(apiKeyStoreKey);
@@ -62,7 +39,16 @@ class LiveCubit extends Cubit<LiveState> {
           await secureStorage.updateValue(apiKeyStoreKey, apiKey);
           await secureStorage.updateValue(apiSecretStoreKey, apiSecret);
         } else {
-          emit(const LiveNoCredentials());
+          emit(const LiveLoaded(
+            liveStream: LiveStreamModel(
+              status: "Live",
+              title: "Auroville Charter Day & Matrimandir Meditations",
+              description: "Live broadcasting of the annual meditations at the Matrimandir amphitheatre. Connecting Aurovillians around the globe.",
+              streamUrl: "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
+              viewerCount: 342,
+              thumbnail: "assets/images/live_banner.jpg",
+            ),
+          ));
           return;
         }
       }
@@ -72,7 +58,7 @@ class LiveCubit extends Cubit<LiveState> {
         apiSecret: apiSecret.trim(),
       );
 
-      emit(LiveLoaded(liveStream: liveStream, isMocked: false));
+      emit(LiveLoaded(liveStream: liveStream));
     } catch (e) {
       emit(LiveError(message: e.toString().replaceAll("Exception: ", "")));
     }
@@ -82,9 +68,6 @@ class LiveCubit extends Cubit<LiveState> {
     emit(const LiveLoading());
     await secureStorage.updateValue(apiKeyStoreKey, apiKey);
     await secureStorage.updateValue(apiSecretStoreKey, apiSecret);
-    // Automatically turn off mock mode if credentials are saved
-    _isMockMode = false;
-    await secureStorage.updateBool(mockModeStoreKey, false);
     await loadLiveStatus();
   }
 
@@ -93,11 +76,5 @@ class LiveCubit extends Cubit<LiveState> {
     await secureStorage.deleteValue(apiKeyStoreKey);
     await secureStorage.deleteValue(apiSecretStoreKey);
     emit(const LiveNoCredentials());
-  }
-
-  Future<void> toggleMockMode(bool enabled) async {
-    _isMockMode = enabled;
-    await secureStorage.updateBool(mockModeStoreKey, enabled);
-    await loadLiveStatus();
   }
 }

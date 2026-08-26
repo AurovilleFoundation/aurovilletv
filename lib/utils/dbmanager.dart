@@ -11,7 +11,7 @@ class DBManager {
   static Database? _database;
 
   static const String _databaseName = 'auroville_tv.db';
-  static const int _databaseVersion = 1;
+  static const int _databaseVersion = 2;
   static const String watchListTable = 'watchlist';
 
   Future<Database> get database async {
@@ -25,7 +25,12 @@ class DBManager {
   Future<Database> _initDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, _databaseName);
-    return openDatabase(path, version: _databaseVersion, onCreate: _onCreate);
+    return openDatabase(
+      path,
+      version: _databaseVersion,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -36,7 +41,7 @@ class DBManager {
         description TEXT NOT NULL,
         video_url TEXT NOT NULL,
         thumbnail TEXT NOT NULL,
-        category_id INTEGER NOT NULL,
+        category_id TEXT NOT NULL,
         date_time TEXT NOT NULL,
         featured INTEGER NOT NULL,
         view_count INTEGER NOT NULL
@@ -46,12 +51,20 @@ class DBManager {
     // Categories Table
     await db.execute('''
     CREATE TABLE event_categories (
-      id INTEGER PRIMARY KEY,
+      id TEXT PRIMARY KEY,
       name TEXT NOT NULL
     )
     ''');
 
     await _insertDummyVideos(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('DROP TABLE IF EXISTS $watchListTable');
+      await db.execute('DROP TABLE IF EXISTS event_categories');
+      await _onCreate(db, newVersion);
+    }
   }
 
   Future<List<VideoModel>> getWatchList() async {
@@ -151,7 +164,7 @@ class DBManager {
         description: 'An inspiring documentary about Auroville.',
         videoUrl: 'https://example.com/video1.mp4',
         thumbnail: 'assets/images/thumb1.jpg',
-        categoryId: 1,
+        categoryId: 'Workshop',
         dateTime: DateTime.now().subtract(const Duration(days: 1)),
         featured: true,
         viewCount: 2560,
@@ -162,7 +175,7 @@ class DBManager {
         description: 'Journey into the heart of Auroville.',
         videoUrl: 'https://example.com/video2.mp4',
         thumbnail: 'assets/images/thumb2.jpg',
-        categoryId: 2,
+        categoryId: 'Events',
         dateTime: DateTime.now().subtract(const Duration(days: 2)),
         featured: true,
         viewCount: 1824,
@@ -173,7 +186,7 @@ class DBManager {
         description: 'How Auroville is building a sustainable future.',
         videoUrl: 'https://example.com/video3.mp4',
         thumbnail: 'assets/images/thumb3.jpg',
-        categoryId: 3,
+        categoryId: 'Educational',
         dateTime: DateTime.now().subtract(const Duration(days: 3)),
         featured: false,
         viewCount: 1432,
@@ -184,7 +197,7 @@ class DBManager {
         description: 'Stories from the younger generation.',
         videoUrl: 'https://example.com/video4.mp4',
         thumbnail: 'assets/images/thumb4.jpg',
-        categoryId: 4,
+        categoryId: 'Spiritual',
         dateTime: DateTime.now().subtract(const Duration(days: 4)),
         featured: false,
         viewCount: 920,
@@ -195,7 +208,7 @@ class DBManager {
         description: 'The transformation of a barren land.',
         videoUrl: 'https://example.com/video5.mp4',
         thumbnail: 'assets/images/thumb5.jpg',
-        categoryId: 5,
+        categoryId: 'Workshop',
         dateTime: DateTime.now().subtract(const Duration(days: 5)),
         featured: true,
         viewCount: 3285,

@@ -30,21 +30,15 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
     emit(state.copyWith(isLoading: true, clearError: true));
 
     try {
-      final categories = await dbManager.getCategories();
-
-      if (categories.isEmpty) {
-        emit(
-          state.copyWith(
-            isLoading: false,
-            errorMessage: 'No categories found.',
-          ),
-        );
-        return;
-      }
+      final dbCategories = await dbManager.getCategories();
+      final categories = [
+        const CategoryModel(id: 'All', name: 'All'),
+        ...dbCategories,
+      ];
 
       final firstCategory = categories.first;
 
-      final videos = firstCategory.id == 0
+      final videos = firstCategory.id == 'All'
           ? await apiService.getAllVideos()
           : await apiService.getVideos(categoryId: firstCategory.id);
 
@@ -78,7 +72,7 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
     );
 
     try {
-      final videos = event.categoryId == 0
+      final videos = event.categoryId == 'All'
           ? await apiService.getAllVideos()
           : await apiService.getVideos(categoryId: event.categoryId);
 
@@ -97,7 +91,7 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
     Emitter<ExploreState> emit,
   ) async {
     try {
-      final videos = state.selectedCategoryId == 0
+      final videos = state.selectedCategoryId == 'All'
           ? await apiService.getAllVideos()
           : await apiService.getVideos(categoryId: state.selectedCategoryId);
 

@@ -1,6 +1,7 @@
 import 'package:aurovilletv/data/models/live_stream_model.dart';
 import 'package:aurovilletv/ui/live/cubit/live_cubit.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
@@ -14,12 +15,31 @@ class LiveScreen extends StatefulWidget {
 
 class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
-  bool _isPlaying = true;
+  bool _isPlaying = false;
   bool _isMuted = true; // Muted by default to satisfy browser autoplay policies
 
   VideoPlayerController? _videoController;
   String? _currentStreamUrl;
   bool _isPlayerInitialized = false;
+  int _activeTab = 0; // 0 = Chat, 1 = Schedule
+
+  void _videoPlayerListener() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    if (duration == Duration.zero) return "00:00";
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds.remainder(60);
+    if (duration.inHours > 0) {
+      final hours = duration.inHours;
+      return "${twoDigits(hours)}:${twoDigits(minutes.remainder(60))}:${twoDigits(seconds)}";
+    }
+    return "${twoDigits(minutes)}:${twoDigits(seconds)}";
+  }
 
   @override
   void initState() {
@@ -28,6 +48,13 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
       vsync: this,
       duration: const Duration(seconds: 1),
     )..repeat(reverse: true);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final cubit = context.read<LiveCubit>();
+      if (cubit.state is LiveInitial) {
+        cubit.loadLiveStatus();
+      }
+    });
   }
 
   void _initializePlayer(String url) async {
@@ -40,25 +67,40 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
       return;
     }
 
+    // On Web, HLS (.m3u8) streams trigger assertion crashes in debug mode
+    // due to timeline parsing issues. We fall back to a safe MP4 stream.
+    final playUrl = (kIsWeb && url.contains('.m3u8'))
+        ? "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4"
+        : url;
+
     setState(() {
       _isPlayerInitialized = false;
       _currentStreamUrl = url;
     });
 
     final oldController = _videoController;
-    final newController = VideoPlayerController.networkUrl(Uri.parse(url));
+    final newController = VideoPlayerController.networkUrl(Uri.parse(playUrl));
     _videoController = newController;
 
     try {
       await newController.initialize();
       if (_videoController == newController) {
+        newController.addListener(_videoPlayerListener);
         setState(() {
           _isPlayerInitialized = true;
         });
         newController.setVolume(_isMuted ? 0.0 : 1.0);
         newController.setLooping(true);
         if (_isPlaying) {
-          newController.play();
+          try {
+            if (newController.value.position.isNegative) {
+              await newController.seekTo(Duration.zero);
+              await Future.delayed(const Duration(milliseconds: 100));
+            }
+            await newController.play();
+          } catch (e) {
+            debugPrint("Error playing video on init: $e");
+          }
         }
       } else {
         newController.dispose();
@@ -74,11 +116,12 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
     }
 
     if (oldController != null) {
+      oldController.removeListener(_videoPlayerListener);
       await oldController.dispose();
     }
   }
 
-  void _togglePlay() {
+  void _togglePlay() async {
     if (_videoController == null || !_isPlayerInitialized) {
       setState(() {
         _isPlaying = !_isPlaying;
@@ -87,12 +130,25 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
     }
     setState(() {
       _isPlaying = !_isPlaying;
-      if (_isPlaying) {
-        _videoController?.play();
-      } else {
-        _videoController?.pause();
-      }
     });
+
+    if (_isPlaying) {
+      try {
+        if (_videoController!.value.position.isNegative) {
+          await _videoController!.seekTo(Duration.zero);
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+        await _videoController!.play();
+      } catch (e) {
+        debugPrint("Error playing video: $e");
+      }
+    } else {
+      try {
+        await _videoController!.pause();
+      } catch (e) {
+        debugPrint("Error pausing video: $e");
+      }
+    }
   }
 
   void _toggleMute() {
@@ -111,6 +167,7 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _pulseController.dispose();
+    _videoController?.removeListener(_videoPlayerListener);
     _videoController?.dispose();
     super.dispose();
   }
@@ -137,7 +194,7 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
       ),
       body: BlocBuilder<LiveCubit, LiveState>(
         builder: (context, state) {
-          if (state is LiveLoading) {
+          if (state is LiveLoading || state is LiveInitial) {
             return const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.themeColor),
@@ -148,7 +205,7 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
           } else if (state is LiveError) {
             return _buildErrorState(context, state.message);
           } else if (state is LiveLoaded) {
-            return _buildLiveContent(context, state.liveStream, state.isMocked);
+            return _buildLiveContent(context, state.liveStream);
           }
           return const SizedBox.shrink();
         },
@@ -285,7 +342,7 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildLiveContent(BuildContext context, LiveStreamModel liveStream, bool isMocked) {
+  Widget _buildLiveContent(BuildContext context, LiveStreamModel liveStream) {
     if (liveStream.streamUrl != _currentStreamUrl) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _initializePlayer(liveStream.streamUrl);
@@ -314,25 +371,16 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                             child: VideoPlayer(_videoController!),
                           ),
                         )
-                      : Opacity(
-                          opacity: _isPlaying ? 0.8 : 0.4,
-                          child: Image.asset(
-                            "assets/images/live_banner.jpg", // fallback
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, _, __) {
-                              return Container(
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [Colors.black87, AppColors.earthColor],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                ),
-                                child: const Center(
-                                  child: Icon(Icons.live_tv_rounded, size: 64, color: Colors.white24),
-                                ),
-                              );
-                            },
+                      : Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.black87, AppColors.earthColor],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.live_tv_rounded, size: 64, color: Colors.white24),
                           ),
                         ),
                   // Show loading spinner if controller is initializing
@@ -422,39 +470,75 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                           end: Alignment.bottomCenter,
                         ),
                       ),
-                      child: Row(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          IconButton(
-                            icon: Icon(
-                              _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                              color: Colors.white,
+                          if (_videoController != null && _isPlayerInitialized) ...[
+                            VideoProgressIndicator(
+                              _videoController!,
+                              allowScrubbing: true,
+                              padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                              colors: const VideoProgressColors(
+                                playedColor: AppColors.themeColor,
+                                bufferedColor: Colors.white38,
+                                backgroundColor: Colors.white24,
+                              ),
                             ),
-                            onPressed: _togglePlay,
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                              color: Colors.white,
-                            ),
-                            onPressed: _toggleMute,
-                          ),
-                          const Spacer(),
-                          const Text(
-                            "LIVE",
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.fullscreen_rounded, color: Colors.white),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Fullscreen mode simulation")),
-                              );
-                            },
+                          ],
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                                  color: Colors.white,
+                                ),
+                                onPressed: _togglePlay,
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                                  color: Colors.white,
+                                ),
+                                onPressed: _toggleMute,
+                              ),
+                              const SizedBox(width: 8),
+                              if (_videoController != null && _isPlayerInitialized)
+                                Builder(
+                                  builder: (context) {
+                                    final position = _videoController!.value.position;
+                                    final duration = _videoController!.value.duration;
+                                    final isLive = duration == Duration.zero || duration.inDays > 1;
+                                    final elapsedStr = _formatDuration(position);
+                                    final durationStr = isLive ? "LIVE" : _formatDuration(duration);
+                                    return Text(
+                                      "$elapsedStr / $durationStr",
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              const Spacer(),
+                              const Text(
+                                "LIVE",
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.fullscreen_rounded, color: Colors.white),
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Fullscreen mode simulation")),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -504,17 +588,16 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
                 SizedBox(height: (liveStream.title.isNotEmpty || liveStream.description.isNotEmpty) ? 24 : 12),
                 const Divider(),
                 const SizedBox(height: 12),
-                // Wireframe chat/schedule placeholders
-                const Text(
-                  "Live Interaction",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.earthColor,
-                  ),
+                // Tab Selection for Chat & Schedule
+                Row(
+                  children: [
+                    _buildTabButton(0, "Live Chat", Icons.chat_bubble_outline_rounded),
+                    const SizedBox(width: 12),
+                    _buildTabButton(1, "Schedule", Icons.schedule_rounded),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                _buildMockChatPlaceholder(),
+                const SizedBox(height: 16),
+                _activeTab == 0 ? _buildMockChatPlaceholder() : _buildMockSchedulePlaceholder(),
               ],
             ),
           ),
@@ -543,7 +626,7 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: mockMessages.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final chat = mockMessages[index];
               return Row(
@@ -602,6 +685,153 @@ class _LiveScreenState extends State<LiveScreen> with SingleTickerProviderStateM
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTabButton(int index, String label, IconData icon) {
+    final isSelected = _activeTab == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _activeTab = index;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.themeColor : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? AppColors.themeColor : Colors.grey.shade200,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.themeColor.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? Colors.white : Colors.grey,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : AppColors.darkColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMockSchedulePlaceholder() {
+    final scheduleItems = [
+      {"time": "09:00 AM", "title": "Auroville Charter Day Celebration", "type": "Archive", "isPast": true},
+      {"time": "10:30 AM", "title": "Morning Meditations at Matrimandir", "type": "Meditations", "isPast": true},
+      {"time": "12:00 PM", "title": "Interviews with Auroville Units - Natura", "type": "Features", "isCurrent": true},
+      {"time": "01:30 PM", "title": "Sustainable Living & Ecology in Auroville", "type": "Documentary"},
+      {"time": "03:00 PM", "title": "Auroville Radio TV Cultural Evening", "type": "Music"},
+      {"time": "04:30 PM", "title": "Community Dialogue: Building the Future", "type": "Talks"},
+    ];
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: scheduleItems.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final item = scheduleItems[index];
+        final isCurrent = item["isCurrent"] == true;
+        final isPast = item["isPast"] == true;
+
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isCurrent ? AppColors.themeColor.withValues(alpha: 0.08) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isCurrent ? AppColors.themeColor.withValues(alpha: 0.3) : Colors.grey.shade200,
+              width: isCurrent ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isCurrent 
+                      ? AppColors.themeColor 
+                      : (isPast ? Colors.grey.shade100 : AppColors.backgroundLight),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  item["time"] as String,
+                  style: TextStyle(
+                    color: isCurrent 
+                        ? Colors.white 
+                        : (isPast ? Colors.grey : AppColors.earthColor),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item["title"] as String,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isPast ? Colors.grey.shade400 : AppColors.darkColor,
+                        decoration: isPast ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item["type"] as String,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isCurrent ? AppColors.themeColor : Colors.grey,
+                        fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isCurrent)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    "ON AIR",
+                    style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 

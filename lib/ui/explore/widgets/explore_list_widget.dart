@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../watchlist/widgets/video_cell_widget.dart';
+import '../../video_player/video_player_screen.dart';
 import '../bloc/explore_bloc.dart';
 
 class ExploreListWidget extends StatelessWidget {
@@ -40,7 +41,17 @@ class ExploreListWidget extends StatelessWidget {
             itemBuilder: (context, index) {
               final video = state.videos[index];
 
-              return VideoCellWidget(video: video, onTap: () {});
+              return VideoCellWidget(
+                video: video,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => VideoPlayerScreen(video: video),
+                    ),
+                  );
+                },
+              );
             },
           ),
         );

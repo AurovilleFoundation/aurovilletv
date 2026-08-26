@@ -29,7 +29,12 @@ class VideoCellWidget extends StatelessWidget {
   Widget _thumbnail() {
     Widget image;
 
-    if (video.thumbnail.startsWith('http')) {
+    if (video.thumbnail.isEmpty) {
+      image = Container(
+        color: Colors.grey.shade100,
+        child: const Icon(Icons.video_library, size: 40, color: Colors.grey),
+      );
+    } else if (video.thumbnail.startsWith('http')) {
       image = Image.network(
         video.thumbnail,
         fit: BoxFit.cover,

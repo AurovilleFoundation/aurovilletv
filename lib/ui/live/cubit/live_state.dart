@@ -17,12 +17,11 @@ class LiveLoading extends LiveState {
 
 class LiveLoaded extends LiveState {
   final LiveStreamModel liveStream;
-  final bool isMocked;
 
-  const LiveLoaded({required this.liveStream, required this.isMocked});
+  const LiveLoaded({required this.liveStream});
 
   @override
-  List<Object?> get props => [liveStream, isMocked];
+  List<Object?> get props => [liveStream];
 }
 
 class LiveNoCredentials extends LiveState {
