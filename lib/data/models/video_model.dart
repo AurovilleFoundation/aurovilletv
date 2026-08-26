@@ -4,46 +4,80 @@ class VideoModel extends Equatable {
   final String id;
   final String title;
   final String description;
-  final String videoUrl;
+  final String? videoUrl;
   final String thumbnail;
-  final int categoryId;
-  final DateTime dateTime;
+  final String? category;
+  final DateTime? publishDate;
+  final DateTime? uploadDate; // ✅ new field
+  final int? durationMinutes; 
+  final String? topicTag;     
   final bool featured;
   final int viewCount;
+  final bool isLive;
+  final bool published;
 
   const VideoModel({
     required this.id,
     required this.title,
     required this.description,
-    required this.videoUrl,
+    this.videoUrl,
     required this.thumbnail,
-    required this.categoryId,
-    required this.dateTime,
-    required this.featured,
-    required this.viewCount,
+    this.category,
+    this.publishDate,
+    this.uploadDate,
+    this.durationMinutes,
+    this.topicTag,
+    this.featured = false,
+    this.viewCount = 0,
+    this.isLive = false,
+    this.published = false,
   });
 
-  VideoModel copyWith({
-    String? id,
-    String? title,
-    String? description,
-    String? videoUrl,
-    String? thumbnail,
-    int? categoryId,
-    DateTime? dateTime,
-    bool? featured,
-    int? viewCount,
-  }) {
+  factory VideoModel.fromMap(Map<String, dynamic> map) {
+    // ✅ robust duration parsing
+    int? parseDuration(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is String && value.contains(':')) {
+        // handle "28:00" → take minutes part
+        final parts = value.split(':');
+        final minutes = int.tryParse(parts[0]) ?? 0;
+        return minutes;
+      }
+      return int.tryParse(value.toString());
+    }
+
     return VideoModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      videoUrl: videoUrl ?? this.videoUrl,
-      thumbnail: thumbnail ?? this.thumbnail,
-      categoryId: categoryId ?? this.categoryId,
-      dateTime: dateTime ?? this.dateTime,
-      featured: featured ?? this.featured,
-      viewCount: viewCount ?? this.viewCount,
+      id: map['id']?.toString() ?? '',
+      title: map['title']?.toString() ?? '',
+      description: map['description']?.toString() ?? '',
+      videoUrl: map['video_url']?.toString(),
+      thumbnail: (map['thumbnail']?.toString().isNotEmpty ?? false)
+          ? map['thumbnail'].toString()
+          : "assets/images/thumb.png", 
+      category: map['category']?.toString(),
+      publishDate: map['date_and_time'] != null
+          ? DateTime.tryParse(map['date_and_time'].toString())
+          : (map['publish_date'] != null
+              ? DateTime.tryParse(map['publish_date'].toString())
+              : null),
+      uploadDate: map['upload_date'] != null
+          ? DateTime.tryParse(map['upload_date'].toString())
+          : null,
+      durationMinutes: parseDuration(map['duration_minutes']), // ✅ fixed
+      topicTag: map['topic_tag']?.toString(), 
+      featured: (map['featured'] is int
+          ? (map['featured'] == 1)
+          : (map['featured'].toString() == 'true')),
+      viewCount: map['view_count'] is int
+          ? map['view_count'] as int
+          : int.tryParse(map['view_count'].toString()) ?? 0,
+      isLive: (map['is_live'] is int
+          ? (map['is_live'] == 1)
+          : (map['is_live'].toString() == 'true')),
+      published: (map['published'] is int
+          ? (map['published'] == 1)
+          : (map['published'].toString() == 'true')),
     );
   }
 
@@ -54,42 +88,33 @@ class VideoModel extends Equatable {
       'description': description,
       'video_url': videoUrl,
       'thumbnail': thumbnail,
-      'category_id': categoryId,
-      'date_time': dateTime.toIso8601String(),
+      'category': category,
+      'publish_date': publishDate?.toIso8601String(),
+      'upload_date': uploadDate?.toIso8601String(),
+      'duration_minutes': durationMinutes,
+      'topic_tag': topicTag, 
       'featured': featured ? 1 : 0,
       'view_count': viewCount,
+      'is_live': isLive ? 1 : 0,
+      'published': published ? 1 : 0,
     };
   }
 
-  factory VideoModel.fromMap(Map<String, dynamic> map) {
-    return VideoModel(
-      id: map['id'] as String,
-      title: map['title'] as String,
-      description: map['description'] as String,
-      videoUrl: map['video_url'] as String,
-      thumbnail: map['thumbnail'] as String,
-      categoryId: map['category_id'] as int,
-      dateTime: DateTime.parse(map['date_time'] as String),
-      featured: (map['featured'] as int) == 1,
-      viewCount: map['view_count'] as int,
-    );
-  }
-
   @override
-  List<Object> get props => [
-    id,
-    title,
-    description,
-    videoUrl,
-    thumbnail,
-    categoryId,
-    dateTime,
-    featured,
-    viewCount,
-  ];
-
-  @override
-  String toString() {
-    return 'VideoModel(id: $id, title: $title)';
-  }
+  List<Object?> get props => [
+        id,
+        title,
+        description,
+        videoUrl,
+        thumbnail,
+        category,
+        publishDate,
+        uploadDate,
+        durationMinutes,
+        topicTag, 
+        featured,
+        viewCount,
+        isLive,
+        published,
+      ];
 }

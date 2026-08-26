@@ -2,70 +2,60 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../bloc/explore_bloc.dart';
+import 'package:aurovilletv/utils/theme/colors.dart';
 
 class CategoryTabWidget extends StatelessWidget {
   const CategoryTabWidget({super.key});
+
+  // Only required tabs
+  static const _tabs = ["All", "Live", "Upcoming", "Ended"];
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ExploreBloc, ExploreState>(
       buildWhen: (previous, current) =>
-          previous.categories != current.categories ||
-          previous.selectedCategoryId != current.selectedCategoryId,
+          previous.selectedCategory != current.selectedCategory,
       builder: (context, state) {
-        if (state.categories.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
         return SizedBox(
           height: 55,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: state.categories.length,
-            separatorBuilder: (_, _) => const SizedBox(width: 8),
+            itemCount: _tabs.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
-              final category = state.categories[index];
+              final label = _tabs[index];
+              final selected = state.selectedCategory == label;
 
-              final selected = category.id == state.selectedCategoryId;
-
-              return FilterChip(
-                label: Text(category.name),
-
+              return ChoiceChip(
+                label: Text(label),
                 selected: selected,
-
-                showCheckmark: false,
-
+                showCheckmark: true,
+                checkmarkColor: AppColors.lightColor,
                 onSelected: (_) {
-                  if (state.isLoading) return;
                   if (!selected) {
                     context.read<ExploreBloc>().add(
-                      CategoryChanged(category.id),
+                      FilterByCategory(label),
                     );
                   }
                 },
-
                 labelStyle: TextStyle(
-                  color: selected ? Colors.white : Colors.black87,
+                  color: selected ? AppColors.lightColor : AppColors.darkColor,
                   fontWeight: FontWeight.w600,
                 ),
-
-                backgroundColor: Colors.grey.shade200,
-
-                selectedColor: Theme.of(context).primaryColor,
-
-                side: BorderSide.none,
-
+                backgroundColor: AppColors.lightColor,
+                selectedColor: AppColors.themeColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(
+                    color: selected
+                        ? AppColors.themeColor
+                        : const Color.fromARGB(255, 240, 237, 235),
+                    width: 1.5,
+                  ),
                 ),
-
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               );
             },
           ),

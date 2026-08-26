@@ -51,14 +51,10 @@ class VideoSearchDelegate extends SearchDelegate<VideoModel?> {
   }
 
   @override
-  PreferredSizeWidget? buildBottom(BuildContext context) {
-    return null;
-  }
+  PreferredSizeWidget? buildBottom(BuildContext context) => null;
 
   @override
-  Widget? buildFlexibleSpace(BuildContext context) {
-    return null;
-  }
+  Widget? buildFlexibleSpace(BuildContext context) => null;
 }
 
 class _SearchBody extends StatelessWidget {
@@ -97,16 +93,18 @@ class _SearchBody extends StatelessWidget {
           return const Center(child: Text("No videos found"));
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.only(top: 8),
-          itemCount: state.videos.length,
-          separatorBuilder: (_, _) =>
-              const Divider(height: 1, indent: 16, endIndent: 16),
-          itemBuilder: (context, index) {
-            final video = state.videos[index];
-
-            return VideoCellWidget(video: video, onTap: () {});
-          },
+        return Container(
+          color: Colors.white,
+          child: ListView.separated(
+            padding: const EdgeInsets.only(top: 8),
+            itemCount: state.videos.length,
+            separatorBuilder: (_, _) =>
+                const Divider(height: 1, indent: 16, endIndent: 16),
+            itemBuilder: (context, index) {
+              final video = state.videos[index];
+              return VideoCellWidget(video: video, onTap: () {});
+            },
+          ),
         );
       },
     );

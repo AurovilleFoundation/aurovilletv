@@ -5,6 +5,7 @@ class ExploreState extends Equatable {
   final List<CategoryModel> categories;
   final int selectedCategoryId;
   final List<VideoModel> videos;
+  final String selectedCategory; // 👉 new field for All/Live/Upcoming/Ended
   final String? errorMessage;
 
   const ExploreState({
@@ -12,6 +13,7 @@ class ExploreState extends Equatable {
     this.categories = const [],
     this.selectedCategoryId = 0,
     this.videos = const [],
+    this.selectedCategory = "All", // ✅ default tab
     this.errorMessage,
   });
 
@@ -20,6 +22,7 @@ class ExploreState extends Equatable {
     List<CategoryModel>? categories,
     int? selectedCategoryId,
     List<VideoModel>? videos,
+    String? selectedCategory,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -28,16 +31,18 @@ class ExploreState extends Equatable {
       categories: categories ?? this.categories,
       selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
       videos: videos ?? this.videos,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     );
   }
 
   @override
   List<Object?> get props => [
-    isLoading,
-    categories,
-    selectedCategoryId,
-    videos,
-    errorMessage,
-  ];
+        isLoading,
+        categories,
+        selectedCategoryId,
+        videos,
+        selectedCategory,
+        errorMessage,
+      ];
 }
