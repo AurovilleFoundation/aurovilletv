@@ -1,10 +1,6 @@
-import 'package:aurovilletv/data/network/api/video_api_service.dart';
-import 'package:aurovilletv/ui/explore/search_screen.dart';
-import 'package:aurovilletv/utils/dbmanager.dart';
 import 'package:flutter/material.dart';
-
-import 'widgets/category_tab_widget.dart';
-import 'widgets/explore_list_widget.dart';
+import 'package:aurovilletv/data/network/api/video_api_service.dart';
+import 'package:aurovilletv/utils/dbmanager.dart';
 
 class ExploreScreen extends StatelessWidget {
   final VideoApiService apiService;
@@ -18,43 +14,28 @@ class ExploreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ExploreView(apiService: apiService);
-  }
-}
-
-class _ExploreView extends StatelessWidget {
-  final VideoApiService apiService;
-
-  const _ExploreView({required this.apiService});
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Explore"),
-        centerTitle: false,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            tooltip: 'Search',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SearchScreen(apiService: apiService),
-                ),
-              );
-            },
-          ),
-        ],
+        centerTitle: true,
       ),
-      body: Column(
-        children: const [
-          CategoryTabWidget(),
-          Divider(height: 1),
-          Expanded(child: ExploreListWidget()),
-        ],
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.explore_outlined, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              "Explore Screen",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Teammate code will be pushed here.",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
       ),
     );
   }
