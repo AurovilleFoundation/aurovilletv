@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-  import 'package:aurovilletv/data/models/video_model.dart';
+import 'package:aurovilletv/data/models/video_model.dart';
 
 class InfoImage extends StatelessWidget {
   final VideoModel video;

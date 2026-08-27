@@ -9,8 +9,8 @@ class VideoModel extends Equatable {
   final String? category;
   final DateTime? publishDate;
   final DateTime? uploadDate; // ✅ new field
-  final int? durationMinutes; 
-  final String? topicTag;     
+  final int? durationMinutes;
+  final String? topicTag;
   final bool featured;
   final int viewCount;
   final bool isLive;
@@ -54,7 +54,7 @@ class VideoModel extends Equatable {
       videoUrl: map['video_url']?.toString(),
       thumbnail: (map['thumbnail']?.toString().isNotEmpty ?? false)
           ? map['thumbnail'].toString()
-          : "assets/images/thumb.png", 
+          : "assets/images/thumb.png",
       category: map['category']?.toString(),
       publishDate: map['date_and_time'] != null
           ? DateTime.tryParse(map['date_and_time'].toString())
@@ -64,8 +64,8 @@ class VideoModel extends Equatable {
       uploadDate: map['upload_date'] != null
           ? DateTime.tryParse(map['upload_date'].toString())
           : null,
-      durationMinutes: parseDuration(map['duration_minutes']), // ✅ fixed
-      topicTag: map['topic_tag']?.toString(), 
+      durationMinutes: parseDuration(map['duration_minutes']),
+      topicTag: map['topic_tag']?.toString(),
       featured: (map['featured'] is int
           ? (map['featured'] == 1)
           : (map['featured'].toString() == 'true')),
@@ -92,7 +92,7 @@ class VideoModel extends Equatable {
       'publish_date': publishDate?.toIso8601String(),
       'upload_date': uploadDate?.toIso8601String(),
       'duration_minutes': durationMinutes,
-      'topic_tag': topicTag, 
+      'topic_tag': topicTag,
       'featured': featured ? 1 : 0,
       'view_count': viewCount,
       'is_live': isLive ? 1 : 0,
@@ -111,7 +111,7 @@ class VideoModel extends Equatable {
         publishDate,
         uploadDate,
         durationMinutes,
-        topicTag, 
+        topicTag,
         featured,
         viewCount,
         isLive,

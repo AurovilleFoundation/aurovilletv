@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-  import 'package:aurovilletv/data/models/video_model.dart';
+import 'package:aurovilletv/data/models/video_model.dart';
 
 class InfoDetails extends StatelessWidget {
   final VideoModel video;

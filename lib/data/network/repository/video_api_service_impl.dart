@@ -14,21 +14,20 @@ class VideoApiServiceImpl implements VideoApiService {
   Dio get _dio => dioClient.dio;
 
   // ---------------- All Videos ----------------
-@override
-Future<List<VideoModel>> getAllVideos() async {
-  try {
-    final response = await _dio.get(
-      "https://aiis.auroville.org/api/method/register_of_residence.media.api.atv.videos?page=1&limit=10",
-      options: Options(headers: {
-        "Authorization": "token ecadacc37f4fd48:278a8eda422a329" 
-      }),
-    );
-    return _parseVideos(response.data);
-  } on DioException catch (e) {
-    throw Exception(_getErrorMessage(e));
+  @override
+  Future<List<VideoModel>> getAllVideos() async {
+    try {
+      final response = await _dio.get(
+        "$baseUrl.videos?page=1&limit=10",
+        options: Options(headers: {
+          "Authorization": "token ecadacc37f4fd48:278a8eda422a329",
+        }),
+      );
+      return _parseVideos(response.data);
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
+    }
   }
-}
-
 
   // ---------------- Category Videos ----------------
   @override
@@ -37,7 +36,7 @@ Future<List<VideoModel>> getAllVideos() async {
       final response = await _dio.get(
         "$baseUrl.videos?page=1&limit=10&category_id=$categoryId&sort=latest",
         options: Options(headers: {
-          "Authorization": "token ecadacc37f4fd48:278a8eda422a329"
+          "Authorization": "token ecadacc37f4fd48:278a8eda422a329",
         }),
       );
       return _parseVideos(response.data);
@@ -53,7 +52,7 @@ Future<List<VideoModel>> getAllVideos() async {
       final response = await _dio.get(
         "$baseUrl.search?q=$keyword&page=1&limit=10",
         options: Options(headers: {
-          "Authorization": "token ecadacc37f4fd48:278a8eda422a329"
+          "Authorization": "token ecadacc37f4fd48:278a8eda422a329",
         }),
       );
       return _parseVideos(response.data);
@@ -62,31 +61,26 @@ Future<List<VideoModel>> getAllVideos() async {
     }
   }
 
- // ---------------- Live ----------------
-@override
-Future<List<VideoModel>> getLiveVideos() async {
-  try {
-    // Instead of API, return static live stream as VideoModel
-    final liveVideo = VideoModel(
-      id: "auroville_live",
-      title: "Auroville Foundation Live",
-      description: "Live stream from Auroville Foundation",
-      videoUrl: "https://aurovilletv.com/hls/education.m3u8",
-      thumbnail: "assets/images/thumb.png", // fallback thumbnail
-      category: "Live",
-      publishDate: DateTime.now(),
-      isLive: true,
-      published: true,
-    );
-
-    return [liveVideo];
-  } catch (e) {
-    throw Exception("Failed to load live video: $e");
+  // ---------------- Live ----------------
+  @override
+  Future<List<VideoModel>> getLiveVideos() async {
+    try {
+      final liveVideo = VideoModel(
+        id: "auroville_live",
+        title: "Auroville Foundation Live",
+        description: "Live stream from Auroville Foundation",
+        videoUrl: "https://aurovilletv.com/hls/education.m3u8",
+        thumbnail: "assets/images/thumb.png", // fallback thumbnail
+        category: "Live",
+        publishDate: DateTime.now(),
+        isLive: true,
+        published: true,
+      );
+      return [liveVideo];
+    } catch (e) {
+      throw Exception("Failed to load live video: $e");
+    }
   }
-}
-
-
-
 
   // ---------------- Upcoming (local filter) ----------------
   @override

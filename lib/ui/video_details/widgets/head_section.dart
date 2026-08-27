@@ -7,22 +7,20 @@ class HeadSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            video.thumbnail ?? "",
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const Icon(Icons.broken_image),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          video.title,
-          style: Theme.of(context).textTheme.titleLarge, // ✅ fixed
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(video.title,
+              style: const TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold)),
+          if (video.category != null)
+            Text(video.category!,
+                style: const TextStyle(
+                    fontSize: 14, fontStyle: FontStyle.italic)),
+        ],
+      ),
     );
   }
 }

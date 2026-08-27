@@ -64,7 +64,7 @@ class ExploreListWidget extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Thumbnail with play button
+                        // Thumbnail with play button & LIVE badge
                         Stack(
                           alignment: Alignment.center,
                           children: [
@@ -89,6 +89,30 @@ class ExploreListWidget extends StatelessWidget {
                                 size: 28,
                               ),
                             ),
+                            if (video.isLive)
+                              Positioned(
+                                top: 8,
+                                left: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    "LIVE",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
 
@@ -129,12 +153,21 @@ class ExploreListWidget extends StatelessWidget {
                                       elevation: 1.5,
                                     ),
                                     onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              VideoDetailsScreen(videoId: video.id),
+                                      // ✅ Show VideoDetailsScreen in bottom sheet (not full screen)
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(20),
+                                          ),
                                         ),
+                                        builder: (_) {
+                                          return FractionallySizedBox(
+                                            heightFactor: 0.85, // covers 85% height
+                                            child: VideoDetailsScreen(videoId: video.id),
+                                          );
+                                        },
                                       );
                                     },
                                     child: const Text(
