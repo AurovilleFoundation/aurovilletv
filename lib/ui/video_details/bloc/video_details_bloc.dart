@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'video_details_event.dart';
 import 'video_details_state.dart';
 import 'package:aurovilletv/data/network/api/video_api_service.dart';
-import 'package:aurovilletv/data/models/video_model.dart';
 
 class VideoDetailsBloc extends Bloc<VideoDetailsEvent, VideoDetailsState> {
   final VideoApiService apiService;

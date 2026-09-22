@@ -8,7 +8,8 @@ class VideoModel extends Equatable {
   final String thumbnail;
   final String? category;
   final DateTime? publishDate;
-  final DateTime? uploadDate; // ✅ new field
+  final DateTime? uploadDate;
+  final String? formattedDuration;
   final int? durationMinutes;
   final String? topicTag;
   final bool featured;
@@ -25,6 +26,7 @@ class VideoModel extends Equatable {
     this.category,
     this.publishDate,
     this.uploadDate,
+    this.formattedDuration,
     this.durationMinutes,
     this.topicTag,
     this.featured = false,
@@ -34,28 +36,55 @@ class VideoModel extends Equatable {
   });
 
   factory VideoModel.fromMap(Map<String, dynamic> map) {
-    // ✅ robust duration parsing
-    int? parseDuration(dynamic value) {
-      if (value == null) return null;
-      if (value is int) return value;
-      if (value is String && value.contains(':')) {
-        // handle "28:00" → take minutes part
-        final parts = value.split(':');
-        final minutes = int.tryParse(parts[0]) ?? 0;
-        return minutes;
+    // Automatic duration string builder
+    String? parseAutoDuration(dynamic val) {
+      if (val == null) return null;
+      final str = val.toString().trim();
+      if (str.isEmpty || str == '0') return null;
+
+      // Handle "HH:MM:SS" or "MM:SS"
+      if (str.contains(':')) {
+        final parts = str.split(':');
+        if (parts.length == 3) {
+          final h = int.tryParse(parts[0]) ?? 0;
+          final m = int.tryParse(parts[1]) ?? 0;
+          return h > 0 ? "$h hr $m min" : "$m min";
+        } else if (parts.length == 2) {
+          final m = int.tryParse(parts[0]) ?? 0;
+          final s = int.tryParse(parts[1]) ?? 0;
+          return m > 0 ? "$m min" : "$s sec";
+        }
       }
-      return int.tryParse(value.toString());
+
+      // Handle integer seconds or minutes
+      final numVal = int.tryParse(str);
+      if (numVal != null && numVal > 0) {
+        if (numVal > 120) { // Assuming it is seconds
+          final h = numVal ~/ 3600;
+          final m = (numVal % 3600) ~/ 60;
+          return h > 0 ? "$h hr $m min" : "$m min";
+        }
+        return "$numVal min";
+      }
+
+      return str.contains("min") ? str : "$str min";
     }
 
+    final rawDuration = map['duration'] ??
+        map['duration_minutes'] ??
+        map['video_duration'] ??
+        map['length'] ??
+        map['total_time'];
+
     return VideoModel(
-      id: map['id']?.toString() ?? '',
+      id: map['id']?.toString() ?? map['name']?.toString() ?? '',
       title: map['title']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
-      videoUrl: map['video_url']?.toString(),
+      videoUrl: map['video_url']?.toString() ?? map['video']?.toString() ?? map['url']?.toString(),
       thumbnail: (map['thumbnail']?.toString().isNotEmpty ?? false)
           ? map['thumbnail'].toString()
-          : "assets/images/thumb.png",
-      category: map['category']?.toString(),
+          : (map['image']?.toString() ?? "assets/images/thumb.png"),
+      category: map['category']?.toString() ?? map['category_name']?.toString(),
       publishDate: map['date_and_time'] != null
           ? DateTime.tryParse(map['date_and_time'].toString())
           : (map['publish_date'] != null
@@ -64,7 +93,8 @@ class VideoModel extends Equatable {
       uploadDate: map['upload_date'] != null
           ? DateTime.tryParse(map['upload_date'].toString())
           : null,
-      durationMinutes: parseDuration(map['duration_minutes']),
+      formattedDuration: parseAutoDuration(rawDuration),
+      durationMinutes: int.tryParse(map['duration_minutes']?.toString() ?? ''),
       topicTag: map['topic_tag']?.toString(),
       featured: (map['featured'] is int
           ? (map['featured'] == 1)
@@ -110,6 +140,7 @@ class VideoModel extends Equatable {
         category,
         publishDate,
         uploadDate,
+        formattedDuration,
         durationMinutes,
         topicTag,
         featured,

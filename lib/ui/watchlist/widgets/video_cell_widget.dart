@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
+import 'package:flutter/material.dart';
 
 class VideoCellWidget extends StatelessWidget {
   final VideoModel video;
@@ -12,78 +12,95 @@ class VideoCellWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ Thumbnail on left
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Stack(
-                children: [
-                  SizedBox(
-                    width: 120,
-                    height: 90,
-                    child: video.thumbnail.isNotEmpty &&
-                            video.thumbnail.startsWith('http')
-                        ? Image.network(video.thumbnail, fit: BoxFit.cover)
-                        : Image.asset(video.thumbnail, fit: BoxFit.cover),
-                  ),
-                  Positioned(
-                    right: 6,
-                    bottom: 6,
-                    child: CircleAvatar(
-                      radius: 14,
-                      backgroundColor: AppColors.themeColor,
-                      child: const Icon(Icons.play_arrow_rounded,
-                          color: AppColors.lightColor, size: 20),
-                    ),
-                  ),
-                  if (video.isLive) _liveBadge(),
-                ],
-              ),
-            ),
+            _thumbnail(),
             const SizedBox(width: 12),
-
-            // ✅ Only title text on right
-            Expanded(
-              child: Text(
-                video.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimaryColor,
-                ),
-              ),
-            ),
+            Expanded(child: _details(context)),
           ],
         ),
       ),
     );
   }
 
-  Widget _liveBadge() {
-    return Positioned(
-      top: 6,
-      left: 6,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(6),
+  Widget _thumbnail() {
+    Widget image;
+
+    if (video.thumbnail.startsWith('http')) {
+      image = Image.network(
+        video.thumbnail,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) {
+          return const Icon(Icons.video_library, size: 40, color: Colors.grey);
+        },
+      );
+    } else {
+      image = Image.asset(
+        video.thumbnail,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) {
+          return const Icon(Icons.video_library, size: 40, color: Colors.grey);
+        },
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 168,
+        height: 96,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            image,
+            Container(color: Colors.black.withValues(alpha: 0.15)),
+            _videoIconWidget(),
+          ],
         ),
-        child: const Text(
-          "LIVE",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _details(BuildContext context) {
+    return SizedBox(
+      height: 96,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Text(
+            video.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 16),
           ),
+          Text(
+            _subtitle(),
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _subtitle() {
+    return "Documentary • 32 mins";
+  }
+
+  Widget _videoIconWidget() {
+    return const Positioned(
+      left: 8,
+      bottom: 8,
+      child: CircleAvatar(
+        radius: 12,
+        backgroundColor: AppColors.scaffoldBackgroundColor,
+        child: Icon(
+          Icons.play_arrow_rounded,
+          color: AppColors.darkColor,
+          size: 18,
         ),
       ),
     );

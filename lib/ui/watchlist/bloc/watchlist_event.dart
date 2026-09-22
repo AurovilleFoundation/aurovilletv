@@ -34,3 +34,8 @@ final class RemoveVideo extends WatchListEvent {
 final class RefreshWatchList extends WatchListEvent {
   const RefreshWatchList();
 }
+
+/// Clear all videos from SQLite
+final class ClearWatchList extends WatchListEvent {
+  const ClearWatchList();
+}

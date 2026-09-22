@@ -10,7 +10,7 @@ class DBManager {
   static Database? _database;
 
   static const String _databaseName = 'auroville_tv.db';
-  static const int _databaseVersion = 1;
+  static const int _databaseVersion = 4; // Bumped version to recreate schema cleanly
   static const String watchListTable = 'watchlist';
   static const String categoriesTable = 'categories';
 
@@ -23,10 +23,16 @@ class DBManager {
   Future<Database> _initDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, _databaseName);
-    return openDatabase(path, version: _databaseVersion, onCreate: _onCreate);
+    return openDatabase(
+      path,
+      version: _databaseVersion,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // ---------------- Watchlist Table Creation ----------------
     await db.execute('''
       CREATE TABLE $watchListTable (
         id TEXT PRIMARY KEY,
@@ -36,47 +42,85 @@ class DBManager {
         thumbnail TEXT,
         category TEXT,
         publish_date TEXT,
+        upload_date TEXT,
         duration_minutes INTEGER,
-        topic_tag TEXT,              -- ✅ fixed: added column
-        featured INTEGER NOT NULL,
-        view_count INTEGER NOT NULL,
-        is_live INTEGER NOT NULL,
-        published INTEGER NOT NULL
+        topic_tag TEXT,
+        featured INTEGER NOT NULL DEFAULT 0,
+        view_count INTEGER NOT NULL DEFAULT 0,
+        is_live INTEGER NOT NULL DEFAULT 0,
+        published INTEGER NOT NULL DEFAULT 0,
+        watched_at TEXT
       )
     ''');
 
+    // ---------------- Categories Table Creation ----------------
     await db.execute('''
       CREATE TABLE $categoriesTable (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL
       )
     ''');
-
-    await _insertDummyVideos(db);
   }
 
-  // ---------------- Watchlist ----------------
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Drop old table to clean up constraint mismatches
+    await db.execute('DROP TABLE IF EXISTS $watchListTable');
+    await db.execute('DROP TABLE IF EXISTS $categoriesTable');
+    await _onCreate(db, newVersion);
+  }
+
+  // ==========================================
+  // ---------------- Watchlist / History -----
+  // ==========================================
+
   Future<List<VideoModel>> getWatchList() async {
     final db = await database;
-    final result = await db.query(watchListTable, orderBy: 'publish_date DESC');
+    final result = await db.query(
+      watchListTable,
+      orderBy: 'COALESCE(watched_at, publish_date) DESC',
+    );
     return result.map(VideoModel.fromMap).toList();
   }
 
+  /// Inserts video with timestamp safely
   Future<void> addVideo(VideoModel video) async {
     final db = await database;
-    await db.insert(watchListTable, video.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    final map = Map<String, dynamic>.from(video.toMap());
+    map['watched_at'] = DateTime.now().toIso8601String();
+
+    await db.insert(
+      watchListTable,
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Same as addVideo (for recording watch history)
+  Future<void> recordVideoWatch(VideoModel video) async {
+    await addVideo(video);
   }
 
   Future<void> removeVideo(String id) async {
     final db = await database;
-    await db.delete(watchListTable, where: 'id = ?', whereArgs: [id]);
+    await db.delete(
+      watchListTable,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> removeFromHistory(String id) async {
+    await removeVideo(id);
   }
 
   Future<bool> isInWatchList(String id) async {
     final db = await database;
-    final result = await db.query(watchListTable,
-        where: 'id = ?', whereArgs: [id], limit: 1);
+    final result = await db.query(
+      watchListTable,
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     return result.isNotEmpty;
   }
 
@@ -85,7 +129,14 @@ class DBManager {
     await db.delete(watchListTable);
   }
 
-  // ---------------- Categories ----------------
+  Future<void> clearWatchHistory() async {
+    await clearWatchList();
+  }
+
+  // ==========================================
+  // ---------------- Categories --------------
+  // ==========================================
+
   Future<List<CategoryModel>> getCategories() async {
     final db = await database;
     final result = await db.query(categoriesTable, orderBy: 'name ASC');
@@ -96,8 +147,11 @@ class DBManager {
     final db = await database;
     final batch = db.batch();
     for (final category in categories) {
-      batch.insert(categoriesTable, category.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace);
+      batch.insert(
+        categoriesTable,
+        category.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
     }
     await batch.commit(noResult: true);
   }
@@ -117,92 +171,5 @@ class DBManager {
       }
       await batch.commit(noResult: true);
     });
-  }
-
-  // ---------------- Dummy Data ----------------
-  Future<void> _insertDummyVideos(Database db) async {
-    final videos = <VideoModel>[
-      VideoModel(
-        id: '1',
-        title: 'Living Together in Diversity',
-        description: 'An inspiring documentary about Auroville.',
-        videoUrl: 'https://example.com/video1.mp4',
-        thumbnail: 'assets/images/thumb.png',
-        category: 'Documentary',
-        publishDate: DateTime.now().subtract(const Duration(days: 1)),
-        durationMinutes: 28,
-        topicTag: 'Nature',
-        featured: true,
-        viewCount: 2560,
-        isLive: false,
-        published: true,
-      ),
-      VideoModel(
-        id: '2',
-        title: 'Voices of Auroville',
-        description: 'Stories from the community.',
-        videoUrl: 'https://example.com/video2.mp4',
-        thumbnail: 'assets/images/thumb.png',
-        category: 'People',
-        publishDate: DateTime.now().subtract(const Duration(days: 2)),
-        durationMinutes: 18,
-        topicTag: 'People',
-        featured: true,
-        viewCount: 1824,
-        isLive: false,
-        published: true,
-      ),
-      VideoModel(
-        id: '3',
-        title: 'Sustainability in Action',
-        description: 'How Auroville is building a sustainable future.',
-        videoUrl: 'https://example.com/video3.mp4',
-        thumbnail: 'assets/images/thumb.png',
-        category: 'Documentary',
-        publishDate: DateTime.now().subtract(const Duration(days: 3)),
-        durationMinutes: 22,
-        topicTag: 'Sustainability',
-        featured: false,
-        viewCount: 1432,
-        isLive: false,
-        published: true,
-      ),
-      VideoModel(
-        id: '4',
-        title: 'Arts as a Way of Life',
-        description: 'Exploring creativity in Auroville.',
-        videoUrl: 'https://example.com/video4.mp4',
-        thumbnail: 'assets/images/thumb.png',
-        category: 'Culture',
-        publishDate: DateTime.now().subtract(const Duration(days: 4)),
-        durationMinutes: 15,
-        topicTag: 'Culture',
-        featured: false,
-        viewCount: 920,
-        isLive: false,
-        published: true,
-      ),
-      VideoModel(
-        id: '5',
-        title: 'Education for Conscious Living',
-        description: 'Talk on holistic education.',
-        videoUrl: 'https://example.com/video5.mp4',
-        thumbnail: 'assets/images/thumb.png',
-        category: 'Talk',
-        publishDate: DateTime.now().subtract(const Duration(days: 5)),
-        durationMinutes: 20,
-        topicTag: 'Education',
-        featured: true,
-        viewCount: 3285,
-        isLive: false,
-        published: true,
-      ),
-    ];
-
-    final batch = db.batch();
-    for (final video in videos) {
-      batch.insert(watchListTable, video.toMap());
-    }
-    await batch.commit(noResult: true);
   }
 }

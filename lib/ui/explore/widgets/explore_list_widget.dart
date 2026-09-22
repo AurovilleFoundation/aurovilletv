@@ -1,11 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:aurovilletv/utils/theme/colors.dart';
+import 'package:aurovilletv/data/models/video_model.dart';
 import '../bloc/explore_bloc.dart';
-import '../../video_details/video_details_screen.dart';
+import 'detail_view_btn.dart';
 
 class ExploreListWidget extends StatelessWidget {
   const ExploreListWidget({super.key});
+
+  static const String _defaultAssetThumb = 'assets/images/thumb.png';
+
+  Widget _buildThumbnail(String thumbnail) {
+    String imageUrl = thumbnail.trim();
+
+    // 1. If empty or points to an asset, load local thumb.png
+    if (imageUrl.isEmpty || imageUrl.startsWith('assets/')) {
+      return _buildLocalThumb();
+    }
+
+    // 2. If valid full HTTP/HTTPS URL, load network image with fallback
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _buildLocalThumb(),
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return _buildLocalThumb();
+        },
+      );
+    }
+
+    // 3. Fallback for all other cases
+    return _buildLocalThumb();
+  }
+
+  Widget _buildLocalThumb() {
+    return Image.asset(
+      _defaultAssetThumb,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(
+        color: const Color(0xFFEADBCE),
+        child: const Center(
+          child: Icon(
+            Icons.movie_creation_outlined,
+            color: Color(0xFFC85A17),
+            size: 36,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +62,7 @@ class ExploreListWidget extends StatelessWidget {
         if (state.isLoading && state.videos.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(
-              color: AppColors.themeColor,
-              strokeWidth: 3,
+              color: Color(0xFFC85A17),
             ),
           );
         }
@@ -32,166 +75,186 @@ class ExploreListWidget extends StatelessWidget {
           return const _EmptyWidget();
         }
 
-        return Container(
-          color: AppColors.scaffoldBackgroundColor,
-          child: RefreshIndicator(
-            color: AppColors.themeColor,
-            onRefresh: () async {
-              context.read<ExploreBloc>().add(const RefreshExplore());
-            },
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: state.videos.length,
-              itemBuilder: (context, index) {
-                final video = state.videos[index];
+        return RefreshIndicator(
+          color: const Color(0xFFC85A17),
+          onRefresh: () async {
+            context.read<ExploreBloc>().add(const RefreshExplore());
+          },
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            itemCount: state.videos.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 20),
+            itemBuilder: (context, index) {
+              final video = state.videos[index];
 
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: AppColors.lightColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.backgroundDark.withValues(alpha: 0.15),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Safe Video Thumbnail Box
+                  SizedBox(
+                    width: 175,
+                    height: 125,
+                    child: Stack(
                       children: [
-                        // Thumbnail with play button & LIVE badge
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 175,
-                              height: 150,
-                              child: video.thumbnail.isNotEmpty &&
-                                      video.thumbnail.startsWith('http')
-                                  ? Image.network(video.thumbnail, fit: BoxFit.cover)
-                                  : Image.asset(video.thumbnail, fit: BoxFit.cover),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.45),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 1.5),
+                        Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: _buildThumbnail(video.thumbnail),
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withValues(alpha: 0.25),
+                                ],
                               ),
-                              child: const Icon(
+                            ),
+                          ),
+                        ),
+                        // Play Icon (Bottom Left)
+                        const Positioned(
+                          left: 10,
+                          bottom: 10,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(6.0),
+                              child: Icon(
                                 Icons.play_arrow_rounded,
-                                color: Colors.white,
-                                size: 28,
+                                color: Colors.black87,
+                                size: 20,
                               ),
                             ),
-                            if (video.isLive)
-                              Positioned(
-                                top: 8,
-                                left: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
+                          ),
+                        ),
+                        // Live Tag (Top Right)
+                        if (video.isLive)
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE53935),
+                                borderRadius: BorderRadius.circular(6),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(4),
+                                ],
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 3,
+                                    backgroundColor: Colors.white,
                                   ),
-                                  child: const Text(
+                                  SizedBox(width: 4),
+                                  Text(
                                     "LIVE",
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w800,
                                       letterSpacing: 0.5,
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-                          ],
-                        ),
-
-                        // Title & Details Button
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  video.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.darkColor,
-                                    height: 1.2,
-                                  ),
-                                ),
-                                Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.themeColor,
-                                      foregroundColor: AppColors.lightColor,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 6,
-                                      ),
-                                      minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      elevation: 1.5,
-                                    ),
-                                    onPressed: () {
-                                      // ✅ Show VideoDetailsScreen in bottom sheet (not full screen)
-                                      showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(20),
-                                          ),
-                                        ),
-                                        builder: (_) {
-                                          return FractionallySizedBox(
-                                            heightFactor: 0.85, // covers 85% height
-                                            child: VideoDetailsScreen(videoId: video.id),
-                                          );
-                                        },
-                                      );
-                                    },
-                                    child: const Text(
-                                      "Details",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
-                );
-              },
-            ),
+
+                  const SizedBox(width: 16),
+
+                  // Title, Subtitle & Conditional Details Button
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          video.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1E1E1E),
+                            height: 1.25,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _VideoMetaSubtitle(video: video),
+                        if (!video.isLive) ...[
+                          const SizedBox(height: 8),
+                          DetailViewBtn(videoId: video.id),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         );
       },
+    );
+  }
+}
+
+class _VideoMetaSubtitle extends StatelessWidget {
+  final VideoModel video;
+
+  const _VideoMetaSubtitle({required this.video});
+
+  String _getDuration() {
+    if (video.formattedDuration != null && video.formattedDuration!.isNotEmpty) {
+      return video.formattedDuration!;
+    }
+    if (video.durationMinutes != null && video.durationMinutes! > 0) {
+      final m = video.durationMinutes!;
+      return m >= 60 ? "${m ~/ 60} hr ${m % 60} min" : "$m min";
+    }
+    return "";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final category = (video.category != null && video.category!.isNotEmpty)
+        ? video.category!
+        : "Documentary";
+
+    final duration = _getDuration();
+    final subtitle = duration.isNotEmpty ? "$category  •  $duration" : category;
+
+    return Text(
+      subtitle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontSize: 13.5,
+        fontWeight: FontWeight.w500,
+        color: Colors.grey.shade600,
+      ),
     );
   }
 }
@@ -201,36 +264,13 @@ class _EmptyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.scaffoldBackgroundColor,
-      child: const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.video_library_outlined,
-                size: 80,
-                color: AppColors.themeColor,
-              ),
-              SizedBox(height: 16),
-              Text(
-                "No Videos Found",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimaryColor,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "There are no videos available in this category.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textHintColor),
-              ),
-            ],
-          ),
+    return const Center(
+      child: Text(
+        "No Videos Found",
+        style: TextStyle(
+          color: Colors.grey,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -239,62 +279,43 @@ class _EmptyWidget extends StatelessWidget {
 
 class _ErrorWidget extends StatelessWidget {
   final String message;
-
   const _ErrorWidget({required this.message});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.scaffoldBackgroundColor,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.cloud_off,
-                size: 70,
-                color: AppColors.themeColor,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "Something went wrong",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimaryColor,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.cloud_off_rounded, size: 50, color: Colors.grey),
+            const SizedBox(height: 12),
+            const Text(
+              "Something went wrong",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFC85A17),
+                side: const BorderSide(color: Color(0xFFC85A17)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textHintColor),
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.themeColor,
-                  foregroundColor: AppColors.lightColor,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  shadowColor: AppColors.backgroundDark.withValues(alpha: 0.35),
-                  elevation: 4,
-                ),
-                onPressed: () {
-                  context.read<ExploreBloc>().add(const RefreshExplore());
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text("Retry"),
-              ),
-            ],
-          ),
+              onPressed: () {
+                context.read<ExploreBloc>().add(const RefreshExplore());
+              },
+              child: const Text("Retry"),
+            ),
+          ],
         ),
       ),
     );

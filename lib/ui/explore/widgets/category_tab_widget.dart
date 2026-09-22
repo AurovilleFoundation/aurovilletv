@@ -1,14 +1,10 @@
-// ignore_for_file: unnecessary_underscores
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/explore_bloc.dart';
-import 'package:aurovilletv/utils/theme/colors.dart';
 
 class CategoryTabWidget extends StatelessWidget {
   const CategoryTabWidget({super.key});
 
-  // Only required tabs
   static const _tabs = ["All", "Live", "Upcoming", "Ended"];
 
   @override
@@ -17,47 +13,56 @@ class CategoryTabWidget extends StatelessWidget {
       buildWhen: (previous, current) =>
           previous.selectedCategory != current.selectedCategory,
       builder: (context, state) {
-        return SizedBox(
-          height: 55,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: _tabs.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final label = _tabs[index];
-              final selected = state.selectedCategory == label;
+        return Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: _tabs.map((label) {
+              final isSelected = state.selectedCategory == label;
 
-              return ChoiceChip(
-                label: Text(label),
-                selected: selected,
-                showCheckmark: true,
-                checkmarkColor: AppColors.lightColor,
-                onSelected: (_) {
-                  if (!selected) {
-                    context.read<ExploreBloc>().add(
-                      FilterByCategory(label),
-                    );
-                  }
-                },
-                labelStyle: TextStyle(
-                  color: selected ? AppColors.lightColor : AppColors.darkColor,
-                  fontWeight: FontWeight.w600,
-                ),
-                backgroundColor: AppColors.lightColor,
-                selectedColor: AppColors.themeColor,
-                shape: RoundedRectangleBorder(
+              return Expanded(
+                child: InkWell(
                   borderRadius: BorderRadius.circular(24),
-                  side: BorderSide(
-                    color: selected
-                        ? AppColors.themeColor
-                        : const Color.fromARGB(255, 240, 237, 235),
-                    width: 1.5,
+                  onTap: () {
+                    if (!isSelected) {
+                      context.read<ExploreBloc>().add(
+                            FilterByCategory(label),
+                          );
+                    }
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Spacer(),
+                      Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? const Color(0xFFC85A17)
+                              : const Color.fromARGB(255, 0, 0, 0),
+                        ),
+                      ),
+                      const Spacer(),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        height: 2.5,
+                        width: isSelected ? 36 : 0,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFFC85A17)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               );
-            },
+            }).toList(),
           ),
         );
       },

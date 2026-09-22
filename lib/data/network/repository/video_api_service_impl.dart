@@ -61,22 +61,38 @@ class VideoApiServiceImpl implements VideoApiService {
     }
   }
 
-  // ---------------- Live ----------------
+  // ---------------- Live Videos (From API Endpoint) ----------------
   @override
   Future<List<VideoModel>> getLiveVideos() async {
     try {
-      final liveVideo = VideoModel(
-        id: "auroville_live",
-        title: "Auroville Foundation Live",
-        description: "Live stream from Auroville Foundation",
-        videoUrl: "https://aurovilletv.com/hls/education.m3u8",
-        thumbnail: "assets/images/thumb.png", // fallback thumbnail
-        category: "Live",
-        publishDate: DateTime.now(),
-        isLive: true,
-        published: true,
+      final response = await _dio.get(
+        "$baseUrl.live",
+        options: Options(headers: {
+          "Authorization": "token ecadacc37f4fd48:278a8eda422a329",
+        }),
       );
-      return [liveVideo];
+
+      final liveList = _parseVideos(response.data);
+      if (liveList.isNotEmpty) {
+        return liveList;
+      }
+
+      // Fallback if API returns an empty list
+      return [
+        VideoModel(
+          id: "auroville_live",
+          title: "Auroville Foundation Live",
+          description: "Live stream from Auroville Foundation",
+          videoUrl: "https://aurovilletv.com/hls/education.m3u8",
+          thumbnail: "assets/images/thumb.png",
+          category: "Live",
+          publishDate: DateTime.now(),
+          isLive: true,
+          published: true,
+        ),
+      ];
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
     } catch (e) {
       throw Exception("Failed to load live video: $e");
     }
@@ -104,11 +120,21 @@ class VideoApiServiceImpl implements VideoApiService {
 
   // ---------------- Helpers ----------------
   List<VideoModel> _parseVideos(dynamic json) {
-    final items = json["message"]?["data"]?["items"];
+    final dynamic data = json["message"]?["data"];
+    dynamic items;
+
+    if (data is Map && data.containsKey("items")) {
+      items = data["items"];
+    } else if (data is List) {
+      items = data;
+    } else if (json["message"] is List) {
+      items = json["message"];
+    }
+
     if (items is List) {
       return items.map((e) => VideoModel.fromMap(e)).toList();
     }
-    print("⚠️ No items found: $json");
+
     return [];
   }
 
