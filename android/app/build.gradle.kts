@@ -44,3 +44,13 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+configurations.all {
+    resolutionStrategy {
+        force("androidx.test:runner:1.6.1")
+        force("androidx.test:rules:1.6.1")
+        force("androidx.test:monitor:1.7.1")
+        force("androidx.test.espresso:espresso-core:3.6.1")
+        force("androidx.test.espresso:espresso-idling-resource:3.6.1")
+    }
+}

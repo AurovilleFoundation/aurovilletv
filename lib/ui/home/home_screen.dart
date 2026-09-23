@@ -5,8 +5,8 @@ import 'package:aurovilletv/ui/explore/bloc/explore_bloc.dart';
 import 'package:aurovilletv/ui/home/cubit/home_cubit.dart';
 import 'package:aurovilletv/ui/main/bloc/navigation_bloc.dart';
 import 'package:aurovilletv/ui/video_player/video_player_screen.dart';
+import 'package:aurovilletv/ui/widgets/video_placeholder_widget.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
@@ -168,6 +168,7 @@ class _HomeLoadedWidget extends StatelessWidget {
             _buildHeroBanner(context),
             _buildExploreSection(context),
             _buildFeaturedSection(context),
+            _buildPopularSection(context),
             _buildLatestVideosSection(context),
           ],
         ),
@@ -178,14 +179,29 @@ class _HomeLoadedWidget extends StatelessWidget {
   // Header App Bar
   Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 4.0),
       child: Row(
         children: [
           Image.asset(
             'assets/images/logo.png',
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 42,
+                height: 42,
+                decoration: const BoxDecoration(
+                  color: AppColors.themeColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.tv_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              );
+            },
           ),
           const SizedBox(width: 12),
           const Text(
@@ -215,125 +231,10 @@ class _HomeLoadedWidget extends StatelessWidget {
     );
   }
 
-  // Hero Banner Slider
-  Widget _buildHeroBanner(BuildContext context) {
-    final heroVideo = homeData.liveVideo;
-    final String heroTitle = heroVideo?.title ?? "The world from Auroville";
-    final String heroDesc = heroVideo?.description ??
-        "Stories, voices and perspectives from the living experiment in human unity.";
-    
-    final String? thumbnail = heroVideo?.thumbnail;
-    final bool useNetworkImage = thumbnail != null && thumbnail.isNotEmpty && thumbnail.startsWith('http');
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Container(
-        height: 230,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Background Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: useNetworkImage
-                  ? CachedNetworkImage(
-                      imageUrl: thumbnail,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: Colors.grey.shade200,
-                        child: const Center(
-                          child: CircularProgressIndicator(color: AppColors.themeColor),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Image.asset(
-                        'assets/images/home_banner.jpg',
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Image.asset(
-                      'assets/images/home_banner.jpg',
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-            ),
-            // Black overlay gradient
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.black.withValues(alpha: 0.5),
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.75),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const Spacer(),
-                  Text(
-                    heroTitle,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    heroDesc,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 12,
-                      height: 1.3,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Page Indicators mockup
-                  Row(
-                    children: [
-                      Container(width: 14, height: 4, decoration: BoxDecoration(color: AppColors.themeColor, borderRadius: BorderRadius.circular(2))),
-                      const SizedBox(width: 4),
-                      Container(width: 6, height: 4, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(2))),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // Explore Categories List
   Widget _buildExploreSection(BuildContext context) {
+    if (homeData.categories.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -344,21 +245,15 @@ class _HomeLoadedWidget extends StatelessWidget {
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.earthColor, letterSpacing: 0.5),
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            "Discover content that inspires",
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-        ),
         const SizedBox(height: 12),
         SizedBox(
           height: 105,
           child: ListView.separated(
+            physics: const BouncingScrollPhysics(),
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             itemCount: homeData.categories.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               final category = homeData.categories[index];
               return _buildCategoryItem(context, category);
@@ -451,21 +346,15 @@ class _HomeLoadedWidget extends StatelessWidget {
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.earthColor, letterSpacing: 0.5),
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            "Stories from the community",
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-        ),
         const SizedBox(height: 12),
         SizedBox(
           height: 190,
           child: ListView.separated(
+            physics: const BouncingScrollPhysics(),
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             itemCount: homeData.featuredVideos.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 14),
+            separatorBuilder: (context, index) => const SizedBox(width: 14),
             itemBuilder: (context, index) {
               final video = homeData.featuredVideos[index];
               return _buildFeaturedVideoCard(context, video);
@@ -477,7 +366,7 @@ class _HomeLoadedWidget extends StatelessWidget {
   }
 
   Widget _buildFeaturedVideoCard(BuildContext context, VideoModel video) {
-    final String image = video.thumbnail.isNotEmpty ? video.thumbnail : "https://live.auroville.org.in/thumbnail.jpg";
+    final String image = _getVideoThumbnail(video.thumbnail);
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -504,34 +393,12 @@ class _HomeLoadedWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Thumbnail with Play button overlay
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: CachedNetworkImage(
-                    imageUrl: image,
-                    height: 120,
-                    width: 250,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => Container(
-                      height: 120,
-                      color: Colors.grey.shade100,
-                      child: const Center(
-                        child: Icon(Icons.video_library_rounded, size: 38, color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(color: Colors.black45, shape: BoxShape.circle),
-                      child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 22),
-                    ),
-                  ),
-                ),
-              ],
+            VideoPlaceholderWidget(
+              width: 250,
+              height: 120,
+              imageUrl: image,
+              borderRadius: 12,
+              iconSize: 24,
             ),
             // Video Info
             Padding(
@@ -547,7 +414,7 @@ class _HomeLoadedWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    "${video.categoryId.isNotEmpty ? video.categoryId : 'General'} • 24 min",
+                    "${video.categoryId.isNotEmpty ? video.categoryId : 'General'} • ${video.viewCount} views",
                     style: const TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 ],
@@ -557,6 +424,112 @@ class _HomeLoadedWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Popular Videos Section
+  Widget _buildPopularSection(BuildContext context) {
+    if (homeData.popularVideos.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            "POPULAR VIDEOS",
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.earthColor, letterSpacing: 0.5),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 190,
+          child: ListView.separated(
+            physics: const BouncingScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            itemCount: homeData.popularVideos.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 14),
+            itemBuilder: (context, index) {
+              final video = homeData.popularVideos[index];
+              return _buildPopularVideoCard(context, video);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPopularVideoCard(BuildContext context, VideoModel video) {
+    final String image = _getVideoThumbnail(video.thumbnail);
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VideoPlayerScreen(video: video),
+          ),
+        );
+      },
+      child: Container(
+        width: 220,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            VideoPlaceholderWidget(
+              width: 220,
+              height: 115,
+              imageUrl: image,
+              borderRadius: 12,
+              iconSize: 22,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    video.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.darkColor),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    "${video.categoryId.isNotEmpty ? video.categoryId : 'General'} • ${video.viewCount} views",
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getVideoThumbnail(String thumbnail) {
+    if (thumbnail.isEmpty) {
+      return "";
+    }
+    if (thumbnail.startsWith('http://') || thumbnail.startsWith('https://')) {
+      return thumbnail;
+    }
+    if (thumbnail.startsWith('/')) {
+      return "https://aiis.auroville.org$thumbnail";
+    }
+    return "https://aiis.auroville.org/$thumbnail";
   }
 
   // Latest Videos Section
@@ -580,7 +553,7 @@ class _HomeLoadedWidget extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           itemCount: homeData.latestVideos.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final video = homeData.latestVideos[index];
             return _buildLatestVideoRow(context, video);
@@ -592,7 +565,7 @@ class _HomeLoadedWidget extends StatelessWidget {
   }
 
   Widget _buildLatestVideoRow(BuildContext context, VideoModel video) {
-    final String image = video.thumbnail.isNotEmpty ? video.thumbnail : "https://live.auroville.org.in/thumbnail.jpg";
+    final String image = _getVideoThumbnail(video.thumbnail);
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -618,22 +591,12 @@ class _HomeLoadedWidget extends StatelessWidget {
         child: Row(
           children: [
             // Image card
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: CachedNetworkImage(
-                imageUrl: image,
-                width: 95,
-                height: 60,
-                fit: BoxFit.cover,
-                errorWidget: (_, __, ___) => Container(
-                  width: 95,
-                  height: 60,
-                  color: Colors.grey.shade100,
-                  child: const Center(
-                    child: Icon(Icons.video_library_rounded, size: 24, color: Colors.grey),
-                  ),
-                ),
-              ),
+            VideoPlaceholderWidget(
+              width: 95,
+              height: 60,
+              imageUrl: image,
+              borderRadius: 8,
+              iconSize: 14,
             ),
             const SizedBox(width: 12),
             // Info Column
@@ -672,6 +635,137 @@ class _HomeLoadedWidget extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Hero Live / Featured Banner (From API live data)
+  Widget _buildHeroBanner(BuildContext context) {
+    final liveVideo = homeData.liveVideo;
+    if (liveVideo == null || liveVideo.title.trim().isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final String title = liveVideo.title.trim();
+    final String description = liveVideo.description.trim();
+    final String thumbnail = _getVideoThumbnail(liveVideo.thumbnail);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 16.0),
+      child: GestureDetector(
+        onTap: () {
+          // Switch to Live Broadcast tab (index 1)
+          context.read<NavigationBloc>().add(const TabChanged(1));
+        },
+        child: Container(
+          height: 250,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Dynamic thumbnail or asset fallback
+                if (thumbnail.isNotEmpty)
+                  VideoPlaceholderWidget(
+                    imageUrl: thumbnail,
+                    borderRadius: 0,
+                    showPlayIcon: false,
+                  )
+                else
+                  Image.asset(
+                    'assets/images/home_banner.jpg',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const VideoPlaceholderWidget(
+                      imageUrl: '',
+                      borderRadius: 0,
+                      showPlayIcon: false,
+                    ),
+                  ),
+                // Gradient overlay
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withValues(alpha: 0.3),
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.85),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+                // Content Overlay
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (liveVideo.categoryId.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.themeColor,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            liveVideo.categoryId.toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      const Spacer(),
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          height: 1.2,
+                        ),
+                      ),
+                      if (description.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            fontSize: 12,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

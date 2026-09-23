@@ -1,6 +1,7 @@
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/data/network/api/video_api_service.dart';
 import 'package:aurovilletv/ui/explore/cubit/search_cubit.dart';
+import 'package:aurovilletv/ui/video_player/video_player_screen.dart';
 import 'package:aurovilletv/ui/watchlist/widgets/video_cell_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -105,7 +106,17 @@ class _SearchBody extends StatelessWidget {
           itemBuilder: (context, index) {
             final video = state.videos[index];
 
-            return VideoCellWidget(video: video, onTap: () {});
+            return VideoCellWidget(
+              video: video,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => VideoPlayerScreen(video: video),
+                  ),
+                );
+              },
+            );
           },
         );
       },

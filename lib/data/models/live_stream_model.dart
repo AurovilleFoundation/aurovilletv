@@ -7,6 +7,8 @@ class LiveStreamModel extends Equatable {
   final String streamUrl;
   final int viewerCount;
   final String thumbnail;
+  final String category;
+  final String publishDate;
 
   const LiveStreamModel({
     required this.status,
@@ -15,6 +17,8 @@ class LiveStreamModel extends Equatable {
     required this.streamUrl,
     required this.viewerCount,
     required this.thumbnail,
+    this.category = '',
+    this.publishDate = '',
   });
 
   LiveStreamModel copyWith({
@@ -24,6 +28,8 @@ class LiveStreamModel extends Equatable {
     String? streamUrl,
     int? viewerCount,
     String? thumbnail,
+    String? category,
+    String? publishDate,
   }) {
     return LiveStreamModel(
       status: status ?? this.status,
@@ -32,6 +38,8 @@ class LiveStreamModel extends Equatable {
       streamUrl: streamUrl ?? this.streamUrl,
       viewerCount: viewerCount ?? this.viewerCount,
       thumbnail: thumbnail ?? this.thumbnail,
+      category: category ?? this.category,
+      publishDate: publishDate ?? this.publishDate,
     );
   }
 
@@ -43,6 +51,8 @@ class LiveStreamModel extends Equatable {
       'stream_url': streamUrl,
       'viewer_count': viewerCount,
       'thumbnail': thumbnail,
+      'category': category,
+      'publish_date': publishDate,
     };
   }
 
@@ -54,17 +64,21 @@ class LiveStreamModel extends Equatable {
       streamUrl: (map['stream_url'] ?? '') as String,
       viewerCount: (map['viewer_count'] ?? 0) as int,
       thumbnail: (map['thumbnail'] ?? '') as String,
+      category: (map['category'] ?? '') as String,
+      publishDate: (map['publish_date'] ?? '') as String,
     );
   }
 
   factory LiveStreamModel.empty() {
     return const LiveStreamModel(
       status: 'Offline',
-      title: 'Auroville TV Live Stream',
-      description: 'Currently we are offline. Please check back later.',
+      title: '',
+      description: '',
       streamUrl: '',
       viewerCount: 0,
       thumbnail: '',
+      category: '',
+      publishDate: '',
     );
   }
 
@@ -76,5 +90,7 @@ class LiveStreamModel extends Equatable {
         streamUrl,
         viewerCount,
         thumbnail,
+        category,
+        publishDate,
       ];
 }

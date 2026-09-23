@@ -22,7 +22,7 @@ class AppColors {
 
   // Background Color
   static const scaffoldBackgroundColor = beigeColor;
-  static const backgroundLight = beigeColor;
+  static const backgroundLight = Color.fromRGBO(245, 239, 232, 1);
   static const backgroundDark = darkColor;
 
   // Text Color

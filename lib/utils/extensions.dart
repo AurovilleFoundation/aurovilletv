@@ -75,10 +75,10 @@ extension BoolFormateExtension on bool? {
 
 extension ColorsExt on Color {
   MaterialColor toMaterialColor() {
-    final int red = this.red;
-    final int green = this.green;
-    final int blue = this.blue;
-    final int alpha = this.alpha;
+    final int red = (r * 255.0).round().clamp(0, 255);
+    final int green = (g * 255.0).round().clamp(0, 255);
+    final int blue = (b * 255.0).round().clamp(0, 255);
+    final int alpha = (a * 255.0).round().clamp(0, 255);
 
     final Map<int, Color> shades = {
       50: Color.fromARGB(alpha, red, green, blue),
@@ -93,6 +93,6 @@ extension ColorsExt on Color {
       900: Color.fromARGB(alpha, red, green, blue),
     };
 
-    return MaterialColor(value, shades);
+    return MaterialColor(toARGB32(), shades);
   }
 }

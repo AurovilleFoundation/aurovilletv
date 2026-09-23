@@ -36,7 +36,7 @@ class ExploreListWidget extends StatelessWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(top: 8, bottom: 16),
             itemCount: state.videos.length,
-            separatorBuilder: (_, __) =>
+            separatorBuilder: (context, index) =>
                 const Divider(height: 1, indent: 16, endIndent: 16),
             itemBuilder: (context, index) {
               final video = state.videos[index];

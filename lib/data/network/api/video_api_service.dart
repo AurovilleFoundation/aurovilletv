@@ -15,6 +15,12 @@ abstract class VideoApiService {
   /// Get live stream details from AIIS API
   Future<LiveStreamModel> getLiveStream({required String apiKey, required String apiSecret});
 
+  /// Get single video details by ID
+  Future<VideoModel> getVideoById(String id);
+
+  /// Increment video view count
+  Future<void> incrementViewCount(String id);
+
   /// Get home page data
   Future<HomeDataModel> getHomeData();
 }

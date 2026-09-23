@@ -1,3 +1,4 @@
+import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,7 +28,7 @@ class WatchListWidget extends StatelessWidget {
 
         if (state is WatchListLoaded) {
           if (state.videos.isEmpty) {
-            return const _EmptyWatchList();
+            return const _EmptyWatchListWidget();
           }
 
           return RefreshIndicator(
@@ -92,28 +93,40 @@ class WatchListWidget extends StatelessWidget {
   }
 }
 
-class _EmptyWatchList extends StatelessWidget {
-  const _EmptyWatchList();
+class _EmptyWatchListWidget extends StatelessWidget {
+  const _EmptyWatchListWidget();
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.bookmark_border_rounded, size: 90, color: Colors.grey),
-            SizedBox(height: 20),
-            Text(
-              "Your Watchlist is Empty",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          children: [
+            Icon(
+              Icons.bookmark_border_rounded,
+              size: 72,
+              color: Colors.grey.shade400,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 16),
+            const Text(
+              "Your Watchlist is Empty",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.earthColor,
+              ),
+            ),
+            const SizedBox(height: 8),
             Text(
-              "Videos you save for later will appear here.",
+              "Save videos by tapping the bookmark icon in the top right corner of any video to watch them later.",
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 15),
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade600,
+                height: 1.4,
+              ),
             ),
           ],
         ),

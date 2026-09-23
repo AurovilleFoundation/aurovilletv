@@ -1,4 +1,5 @@
 import 'package:aurovilletv/data/models/video_model.dart';
+import 'package:aurovilletv/ui/widgets/video_placeholder_widget.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
 
@@ -27,45 +28,12 @@ class VideoCellWidget extends StatelessWidget {
   }
 
   Widget _thumbnail() {
-    Widget image;
-
-    if (video.thumbnail.isEmpty) {
-      image = Container(
-        color: Colors.grey.shade100,
-        child: const Icon(Icons.video_library, size: 40, color: Colors.grey),
-      );
-    } else if (video.thumbnail.startsWith('http')) {
-      image = Image.network(
-        video.thumbnail,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) {
-          return const Icon(Icons.video_library, size: 40, color: Colors.grey);
-        },
-      );
-    } else {
-      image = Image.asset(
-        video.thumbnail,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) {
-          return const Icon(Icons.video_library, size: 40, color: Colors.grey);
-        },
-      );
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 168,
-        height: 96,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            image,
-            Container(color: Colors.black.withValues(alpha: 0.15)),
-            _videoIconWidget(),
-          ],
-        ),
-      ),
+    return VideoPlaceholderWidget(
+      width: 150,
+      height: 96,
+      imageUrl: video.thumbnail,
+      borderRadius: 12,
+      iconSize: 24,
     );
   }
 
@@ -74,40 +42,37 @@ class VideoCellWidget extends StatelessWidget {
       height: 96,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             video.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.darkColor,
+            ),
           ),
-
-          Text(
-            _subtitle(),
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.earthColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Text(
+                "Details",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  String _subtitle() {
-    return "Documentary • 32 mins";
-  }
-
-  Widget _videoIconWidget() {
-    return const Positioned(
-      left: 8,
-      bottom: 8,
-      child: CircleAvatar(
-        radius: 12,
-        backgroundColor: AppColors.scaffoldBackgroundColor,
-        child: Icon(
-          Icons.play_arrow_rounded,
-          color: AppColors.darkColor,
-          size: 18,
-        ),
       ),
     );
   }

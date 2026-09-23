@@ -31,26 +31,12 @@ class LiveCubit extends Cubit<LiveState> {
       var apiSecret = await secureStorage.getValue(apiSecretStoreKey);
 
       if (apiKey == null || apiSecret == null || apiKey.trim().isEmpty || apiSecret.trim().isEmpty) {
-        final envKey = dotenv.env['LIVE_API_KEY'];
-        final envSecret = dotenv.env['LIVE_API_SECRET'];
-        if (envKey != null && envSecret != null && envKey.trim().isNotEmpty && envSecret.trim().isNotEmpty) {
-          apiKey = envKey.trim();
-          apiSecret = envSecret.trim();
-          await secureStorage.updateValue(apiKeyStoreKey, apiKey);
-          await secureStorage.updateValue(apiSecretStoreKey, apiSecret);
-        } else {
-          emit(const LiveLoaded(
-            liveStream: LiveStreamModel(
-              status: "Live",
-              title: "Auroville Charter Day & Matrimandir Meditations",
-              description: "Live broadcasting of the annual meditations at the Matrimandir amphitheatre. Connecting Aurovillians around the globe.",
-              streamUrl: "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
-              viewerCount: 342,
-              thumbnail: "assets/images/live_banner.jpg",
-            ),
-          ));
-          return;
-        }
+        final envKey = dotenv.env['LIVE_API_KEY'] ?? 'ecadacc37f4fd48';
+        final envSecret = dotenv.env['LIVE_API_SECRET'] ?? '278a8eda422a329';
+        apiKey = envKey.trim();
+        apiSecret = envSecret.trim();
+        await secureStorage.updateValue(apiKeyStoreKey, apiKey);
+        await secureStorage.updateValue(apiSecretStoreKey, apiSecret);
       }
 
       final liveStream = await apiService.getLiveStream(

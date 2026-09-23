@@ -1,6 +1,8 @@
 import 'package:aurovilletv/data/network/api/video_api_service.dart';
 import 'package:aurovilletv/ui/explore/cubit/search_cubit.dart';
+import 'package:aurovilletv/ui/video_player/video_player_screen.dart';
 import 'package:aurovilletv/ui/watchlist/widgets/video_cell_widget.dart';
+import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -47,6 +49,7 @@ class _SearchViewState extends State<_SearchView> {
     final cubit = context.read<SearchCubit>();
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -110,8 +113,12 @@ class _SearchViewState extends State<_SearchView> {
               return VideoCellWidget(
                 video: video,
                 onTap: () {
-                  /// TODO
-                  /// Open Player Screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => VideoPlayerScreen(video: video),
+                    ),
+                  );
                 },
               );
             },
