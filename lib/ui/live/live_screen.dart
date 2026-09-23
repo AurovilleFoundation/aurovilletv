@@ -224,53 +224,6 @@ class _LiveScreenState extends State<LiveScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status bar pill
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      "BROADCAST ACTIVE",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              const Text(
-                "Auroville TV 24/7",
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
           // Interactive Live Broadcast Card (Click to open Live Detail Screen)
           GestureDetector(
             onTap: () => _navigateToDetail(liveStream),
@@ -408,33 +361,6 @@ class _LiveScreenState extends State<LiveScreen>
                         ),
                       ),
 
-                      // Bottom label overlay on the card
-                      Positioned(
-                        bottom: 12,
-                        left: 14,
-                        right: 14,
-                        child: Row(
-                          children: const [
-                            Icon(Icons.touch_app_rounded,
-                                color: Colors.white70, size: 16),
-                            SizedBox(width: 6),
-                            Text(
-                              "Tap to watch live stream",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black87,
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -465,18 +391,18 @@ class _LiveScreenState extends State<LiveScreen>
           ],
 
           // Title
-          Text(
-            liveStream.title.isNotEmpty
-                ? liveStream.title
-                : "Auroville TV Live Broadcast",
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColors.earthColor,
-              height: 1.25,
+          if (liveStream.title.isNotEmpty) ...[
+            Text(
+              liveStream.title,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.earthColor,
+                height: 1.25,
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
+            const SizedBox(height: 10),
+          ],
 
           // View count and Publish date
           if (liveStream.viewerCount > 0 || liveStream.publishDate.isNotEmpty) ...[
@@ -519,44 +445,10 @@ class _LiveScreenState extends State<LiveScreen>
             const SizedBox(height: 16),
           ],
 
-          // Primary Call To Action Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton.icon(
-              onPressed: () => _navigateToDetail(liveStream),
-              icon: const Icon(Icons.play_circle_fill_rounded, size: 22),
-              label: const Text(
-                "Watch Live Stream",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.themeColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 3,
-              ),
-            ),
-          ),
+          // Description from API response
           if (liveStream.description.trim().isNotEmpty) ...[
-            const SizedBox(height: 24),
             const Divider(),
             const SizedBox(height: 12),
-            const Text(
-              "About Broadcast",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.earthColor,
-              ),
-            ),
-            const SizedBox(height: 8),
             Text(
               liveStream.description.trim(),
               style: const TextStyle(
