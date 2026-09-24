@@ -79,7 +79,10 @@ class DBManager {
       watchListTable,
       orderBy: 'COALESCE(watched_at, publish_date) DESC',
     );
-    return result.map(VideoModel.fromMap).toList();
+    // Convert raw database rows into Map<String, dynamic> safely before mapping
+    return result
+        .map((row) => VideoModel.fromMap(Map<String, dynamic>.from(row)))
+        .toList();
   }
 
   /// Alias for getWatchList
@@ -146,7 +149,9 @@ class DBManager {
   Future<List<CategoryModel>> getCategories() async {
     final db = await database;
     final result = await db.query(categoriesTable, orderBy: 'name ASC');
-    return result.map((e) => CategoryModel.fromMap(e)).toList();
+    return result
+        .map((e) => CategoryModel.fromMap(Map<String, dynamic>.from(e)))
+        .toList();
   }
 
   Future<void> insertCategories(List<CategoryModel> categories) async {
@@ -173,7 +178,11 @@ class DBManager {
       await txn.delete(categoriesTable);
       final batch = txn.batch();
       for (final category in categories) {
-        batch.insert(categoriesTable, category.toMap());
+        batch.insert(
+          categoriesTable,
+          category.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
       await batch.commit(noResult: true);
     });

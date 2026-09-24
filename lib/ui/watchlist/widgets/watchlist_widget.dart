@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
-import 'package:aurovilletv/ui/explore/widgets/detail_view_btn.dart';
-import 'package:aurovilletv/ui/explore/widgets/watch_live_btn.dart';
 import 'package:aurovilletv/ui/live/live_detail_screen.dart';
 import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import '../bloc/watchlist_bloc.dart';
@@ -141,138 +139,149 @@ class WatchListWidget extends StatelessWidget {
                       ),
                     );
                   },
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Video Thumbnail Container
-                      GestureDetector(
-                        onTap: navigateToVideo,
-                        child: SizedBox(
-                          width: 175,
-                          height: 125,
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: _buildThumbnail(video.thumbnail),
-                                ),
-                              ),
-                            Positioned.fill(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.transparent,
-                                      Colors.black.withValues(alpha: 0.25),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Play Icon (Bottom Left)
-                            const Positioned(
-                              left: 10,
-                              bottom: 10,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.all(6.0),
-                                  child: Icon(
-                                    Icons.play_arrow_rounded,
-                                    color: Colors.black87,
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Live Tag (Top Right)
-                            if (video.isLive)
-                              Positioned(
-                                top: 10,
-                                right: 10,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 7,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE53935),
-                                    borderRadius: BorderRadius.circular(6),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.2),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 1),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 3,
-                                        backgroundColor: Colors.white,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        "LIVE",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    // Video Info & Action Button
-                    Expanded(
-                      child: Column(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: navigateToVideo,
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          GestureDetector(
-                            onTap: navigateToVideo,
-                            child: Text(
-                              video.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E1E1E),
-                                height: 1.25,
-                                letterSpacing: -0.2,
+                          // Video Thumbnail Container
+                          SizedBox(
+                            width: 175,
+                            height: 125,
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: _buildThumbnail(video.thumbnail),
+                                  ),
+                                ),
+                                Positioned.fill(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black.withValues(alpha: 0.25),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Play Icon (Bottom Left)
+                                const Positioned(
+                                  left: 10,
+                                  bottom: 10,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.all(6.0),
+                                      child: Icon(
+                                        Icons.play_arrow_rounded,
+                                        color: Colors.black87,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Live Tag (Top Right)
+                                if (video.isLive)
+                                  Positioned(
+                                    top: 10,
+                                    right: 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 7,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE53935),
+                                        borderRadius: BorderRadius.circular(6),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.2),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 1),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 3,
+                                            backgroundColor: Colors.white,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            "LIVE",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(width: 14),
+
+                          // Video Info Area
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    video.title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF1E1E1E),
+                                      height: 1.25,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  _VideoMetaSubtitle(video: video),
+                                ],
                               ),
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          _VideoMetaSubtitle(video: video),
-                          const SizedBox(height: 8),
-                          if (video.isLive)
-                            WatchLiveBtn(video: video)
-                          else
-                            DetailViewBtn(videoId: video.id, video: video),
+
+                          const SizedBox(width: 8),
+
+                          // Top-Aligned Navigation Indicator Arrow
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10.0),
+                            child: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 18,
+                              color: Colors.grey.shade400,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    ],
                   ),
                 );
               },
