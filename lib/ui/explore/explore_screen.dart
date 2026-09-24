@@ -172,7 +172,7 @@ class _NoInternetWidget extends StatelessWidget {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.themeColor,
-                foregroundColor: Colors.white,
+                foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
