@@ -4,6 +4,8 @@ import 'package:aurovilletv/utils/dbmanager.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import 'package:flutter/foundation.dart';
+
 abstract class HomeState extends Equatable {
   const HomeState();
 
@@ -44,7 +46,11 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       final homeData = await apiService.getHomeData();
       if (dbManager != null && homeData.categories.isNotEmpty) {
-        await dbManager!.replaceCategories(homeData.categories);
+        try {
+          await dbManager!.replaceCategories(homeData.categories);
+        } catch (dbErr) {
+          debugPrint("Failed to cache categories in DB: $dbErr");
+        }
       }
       emit(HomeLoaded(homeData: homeData));
     } catch (e) {

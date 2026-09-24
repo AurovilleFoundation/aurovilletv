@@ -10,7 +10,7 @@ class DBManager {
   static Database? _database;
 
   static const String _databaseName = 'auroville_tv.db';
-  static const int _databaseVersion = 4; // Bumped version to recreate schema cleanly
+  static const int _databaseVersion = 5; // Bumped version to allow TEXT category id
   static const String watchListTable = 'watchlist';
   static const String categoriesTable = 'categories';
 
@@ -56,7 +56,7 @@ class DBManager {
     // ---------------- Categories Table Creation ----------------
     await db.execute('''
       CREATE TABLE $categoriesTable (
-        id INTEGER PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         name TEXT NOT NULL
       )
     ''');
