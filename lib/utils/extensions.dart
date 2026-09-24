@@ -93,6 +93,6 @@ extension ColorsExt on Color {
       900: Color.fromARGB(alpha, red, green, blue),
     };
 
-    return MaterialColor(value, shades);
+    return MaterialColor(toARGB32(), shades);
   }
 }

@@ -56,7 +56,7 @@ class VideoCellWidget extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             image,
-            Container(color: Colors.black.withOpacity(.15)),
+            Container(color: Colors.black.withValues(alpha: 0.15)),
             _videoIconWidget(),
           ],
         ),
@@ -77,7 +77,6 @@ class VideoCellWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 16),
           ),
-
           Text(
             _subtitle(),
             style: TextStyle(color: Colors.grey.shade600, fontSize: 14),

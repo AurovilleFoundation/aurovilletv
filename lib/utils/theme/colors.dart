@@ -18,11 +18,11 @@ class AppColors {
   static const darkColor = Color(0xFF2E2E2E);
   static const lightColor = Color(0xFFFFFFFF);
 
-  static Color primaryColor(BuildContext context) => themeColor;
+  static Color primaryColor(BuildContext context) => const Color.fromRGBO(201, 106, 58, 1);
 
   // Background Color
   static const scaffoldBackgroundColor = beigeColor;
-  static const backgroundLight = beigeColor;
+  static const backgroundLight = Color.fromRGBO(245, 239, 232, 1);
   static const backgroundDark = darkColor;
 
   // Text Color

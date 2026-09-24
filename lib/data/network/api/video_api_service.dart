@@ -9,4 +9,13 @@ abstract class VideoApiService {
 
   /// Search videos
   Future<List<VideoModel>> searchVideos({required String keyword});
+
+  ///  New: Returns live videos
+  Future<List<VideoModel>> getLiveVideos();
+
+  ///  New: Returns upcoming videos
+  Future<List<VideoModel>> getUpcomingVideos(); 
+
+  ///  New: Returns ended videos
+  Future<List<VideoModel>> getEndedVideos();
 }
