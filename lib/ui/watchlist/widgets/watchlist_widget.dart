@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/ui/explore/widgets/detail_view_btn.dart';
+import 'package:aurovilletv/ui/explore/widgets/watch_live_btn.dart';
+import 'package:aurovilletv/ui/live/live_detail_screen.dart';
+import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import '../bloc/watchlist_bloc.dart';
 
 class WatchListWidget extends StatelessWidget {
@@ -87,6 +90,29 @@ class WatchListWidget extends StatelessWidget {
               itemBuilder: (context, index) {
                 final video = state.videos[index];
 
+                void navigateToVideo() {
+                  if (video.isLive) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => LiveDetailScreen(
+                          liveStream: video.toLiveStreamModel(),
+                        ),
+                      ),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => VideoDetailsScreen(
+                          videoId: video.id,
+                          video: video,
+                        ),
+                      ),
+                    );
+                  }
+                }
+
                 return Dismissible(
                   key: ValueKey(video.id),
                   direction: DismissDirection.endToStart,
@@ -119,17 +145,19 @@ class WatchListWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // Video Thumbnail Container
-                      SizedBox(
-                        width: 175,
-                        height: 125,
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: _buildThumbnail(video.thumbnail),
+                      GestureDetector(
+                        onTap: navigateToVideo,
+                        child: SizedBox(
+                          width: 175,
+                          height: 125,
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: _buildThumbnail(video.thumbnail),
+                                ),
                               ),
-                            ),
                             Positioned.fill(
                               child: Container(
                                 decoration: BoxDecoration(
@@ -209,16 +237,19 @@ class WatchListWidget extends StatelessWidget {
                           ],
                         ),
                       ),
+                    ),
 
-                      const SizedBox(width: 16),
+                    const SizedBox(width: 16),
 
-                      // Video Info & Details Button
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
+                    // Video Info & Action Button
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: navigateToVideo,
+                            child: Text(
                               video.title,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -230,14 +261,17 @@ class WatchListWidget extends StatelessWidget {
                                 letterSpacing: -0.2,
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            _VideoMetaSubtitle(video: video),
-                            const SizedBox(height: 8),
-                            // Details Screen Navigate Button
+                          ),
+                          const SizedBox(height: 6),
+                          _VideoMetaSubtitle(video: video),
+                          const SizedBox(height: 8),
+                          if (video.isLive)
+                            WatchLiveBtn(video: video)
+                          else
                             DetailViewBtn(videoId: video.id, video: video),
-                          ],
-                        ),
+                        ],
                       ),
+                    ),
                     ],
                   ),
                 );

@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/data/network/api/video_api_service.dart';
 import 'package:aurovilletv/ui/explore/cubit/search_cubit.dart';
+import 'package:aurovilletv/ui/live/live_detail_screen.dart';
+import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import 'widgets/detail_view_btn.dart';
+import 'widgets/watch_live_btn.dart';
 
 class SearchScreen extends StatelessWidget {
   final VideoApiService apiService;
@@ -152,113 +155,139 @@ class SearchScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final video = state.videos[index];
 
+                          void navigateToVideo() {
+                            if (video.isLive) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => LiveDetailScreen(
+                                    liveStream: video.toLiveStreamModel(),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => VideoDetailsScreen(
+                                    videoId: video.id,
+                                    video: video,
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               // Thumbnail Box
-                              SizedBox(
-                                width: 175,
-                                height: 118,
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: video.thumbnail.isNotEmpty &&
-                                                video.thumbnail.startsWith('http')
-                                            ? Image.network(
-                                                video.thumbnail,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) =>
-                                                    Container(
-                                                  color: Colors.grey.shade300,
-                                                  child: const Icon(
-                                                    Icons.broken_image,
-                                                    color: Colors.grey,
+                              GestureDetector(
+                                onTap: navigateToVideo,
+                                child: SizedBox(
+                                  width: 175,
+                                  height: 118,
+                                  child: Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(20),
+                                          child: video.thumbnail.isNotEmpty &&
+                                                  video.thumbnail.startsWith('http')
+                                              ? Image.network(
+                                                  video.thumbnail,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      Container(
+                                                    color: Colors.grey.shade300,
+                                                    child: const Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                )
+                                              : Image.asset(
+                                                  video.thumbnail,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                        ),
+                                      ),
+                                      Positioned.fill(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(20),
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [
+                                                Colors.transparent,
+                                                Colors.black.withValues(alpha: 0.25),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const Positioned(
+                                        left: 10,
+                                        bottom: 10,
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Padding(
+                                            padding: EdgeInsets.all(6.0),
+                                            child: Icon(
+                                              Icons.play_arrow_rounded,
+                                              color: Colors.black87,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (video.isLive)
+                                        Positioned(
+                                          top: 10,
+                                          right: 10,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 7,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFE53935),
+                                              borderRadius: BorderRadius.circular(6),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withValues(alpha: 0.2),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 1),
+                                                ),
+                                              ],
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 3,
+                                                  backgroundColor: Colors.white,
+                                                ),
+                                                SizedBox(width: 4),
+                                                Text(
+                                                  "LIVE",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w800,
+                                                    letterSpacing: 0.5,
                                                   ),
                                                 ),
-                                              )
-                                            : Image.asset(
-                                                video.thumbnail,
-                                                fit: BoxFit.cover,
-                                              ),
-                                      ),
-                                    ),
-                                    Positioned.fill(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.transparent,
-                                              Colors.black.withValues(alpha: 0.25),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                    const Positioned(
-                                      left: 10,
-                                      bottom: 10,
-                                      child: DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Padding(
-                                          padding: EdgeInsets.all(6.0),
-                                          child: Icon(
-                                            Icons.play_arrow_rounded,
-                                            color: Colors.black87,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    if (video.isLive)
-                                      Positioned(
-                                        top: 10,
-                                        right: 10,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 7,
-                                            vertical: 3,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFE53935),
-                                            borderRadius: BorderRadius.circular(6),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(alpha: 0.2),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 1),
-                                              ),
-                                            ],
-                                          ),
-                                          child: const Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              CircleAvatar(
-                                                radius: 3,
-                                                backgroundColor: Colors.white,
-                                              ),
-                                              SizedBox(width: 4),
-                                              Text(
-                                                "LIVE",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w800,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
 
@@ -270,24 +299,28 @@ class SearchScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      video.title,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF1E1E1E),
-                                        height: 1.25,
-                                        letterSpacing: -0.2,
+                                    GestureDetector(
+                                      onTap: navigateToVideo,
+                                      child: Text(
+                                        video.title,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF1E1E1E),
+                                          height: 1.25,
+                                          letterSpacing: -0.2,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 6),
                                     _SearchVideoSubtitle(video: video),
-                                    if (!video.isLive) ...[
-                                      const SizedBox(height: 8),
+                                    const SizedBox(height: 8),
+                                    if (video.isLive)
+                                      WatchLiveBtn(video: video)
+                                    else
                                       DetailViewBtn(videoId: video.id, video: video),
-                                    ],
                                   ],
                                 ),
                               ),

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'live_stream_model.dart';
 
 class VideoModel extends Equatable {
   final String id;
@@ -174,6 +175,23 @@ class VideoModel extends Equatable {
       'is_live': isLive ? 1 : 0,
       'published': published ? 1 : 0,
     };
+  }
+
+  LiveStreamModel toLiveStreamModel() {
+    const defaultStreamUrl = "https://aurovilletv.com/hls/education.m3u8";
+    final stream = (videoUrl != null && videoUrl!.trim().isNotEmpty)
+        ? videoUrl!.trim()
+        : defaultStreamUrl;
+    return LiveStreamModel(
+      status: "Live",
+      title: title,
+      description: description,
+      streamUrl: stream,
+      viewerCount: viewCount,
+      thumbnail: thumbnail,
+      category: category ?? categoryId,
+      publishDate: publishDate?.toIso8601String() ?? uploadDate?.toIso8601String() ?? '',
+    );
   }
 
   @override
