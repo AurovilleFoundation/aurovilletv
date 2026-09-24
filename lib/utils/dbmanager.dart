@@ -10,7 +10,7 @@ class DBManager {
   static Database? _database;
 
   static const String _databaseName = 'auroville_tv.db';
-  static const int _databaseVersion = 4; // Bumped version to recreate schema cleanly
+  static const int _databaseVersion = 5; // Incremented version to clean up schema and prevent type mismatches
   static const String watchListTable = 'watchlist';
   static const String categoriesTable = 'categories';
 
@@ -54,16 +54,17 @@ class DBManager {
     ''');
 
     // ---------------- Categories Table Creation ----------------
+    // Using TEXT for id to support both String and Integer identifiers safely
     await db.execute('''
       CREATE TABLE $categoriesTable (
-        id INTEGER PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         name TEXT NOT NULL
       )
     ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Drop old table to clean up constraint mismatches
+    // Drop old tables and recreate schema to resolve constraint or type mismatches
     await db.execute('DROP TABLE IF EXISTS $watchListTable');
     await db.execute('DROP TABLE IF EXISTS $categoriesTable');
     await _onCreate(db, newVersion);
@@ -79,10 +80,13 @@ class DBManager {
       watchListTable,
       orderBy: 'COALESCE(watched_at, publish_date) DESC',
     );
-    return result.map(VideoModel.fromMap).toList();
+    // Convert raw database rows into Map<String, dynamic> safely before mapping
+    return result
+        .map((row) => VideoModel.fromMap(Map<String, dynamic>.from(row)))
+        .toList();
   }
 
-  /// Inserts video with timestamp safely
+  /// Inserts a video with a timestamp safely
   Future<void> addVideo(VideoModel video) async {
     final db = await database;
     final map = Map<String, dynamic>.from(video.toMap());
@@ -95,7 +99,7 @@ class DBManager {
     );
   }
 
-  /// Same as addVideo (for recording watch history)
+  /// Alias for addVideo to record watch history
   Future<void> recordVideoWatch(VideoModel video) async {
     await addVideo(video);
   }
@@ -140,7 +144,9 @@ class DBManager {
   Future<List<CategoryModel>> getCategories() async {
     final db = await database;
     final result = await db.query(categoriesTable, orderBy: 'name ASC');
-    return result.map((e) => CategoryModel.fromMap(e)).toList();
+    return result
+        .map((e) => CategoryModel.fromMap(Map<String, dynamic>.from(e)))
+        .toList();
   }
 
   Future<void> insertCategories(List<CategoryModel> categories) async {
@@ -167,7 +173,11 @@ class DBManager {
       await txn.delete(categoriesTable);
       final batch = txn.batch();
       for (final category in categories) {
-        batch.insert(categoriesTable, category.toMap());
+        batch.insert(
+          categoriesTable,
+          category.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
       await batch.commit(noResult: true);
     });
