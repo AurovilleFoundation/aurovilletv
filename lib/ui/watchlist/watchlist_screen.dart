@@ -1,7 +1,5 @@
-import 'package:aurovilletv/ui/main/bloc/navigation_bloc.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'widgets/watchlist_widget.dart';
 
@@ -20,20 +18,35 @@ class _WatchlistView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.darkColor),
-          tooltip: "Back to Home",
-          onPressed: () {
-            context.read<NavigationBloc>().add(const TabChanged(0));
-          },
-        ),
-        title: const Text("Watch list"),
-        centerTitle: true,
-        elevation: 0,
+      backgroundColor: AppColors.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            automaticallyImplyLeading: false,
+            backgroundColor: AppColors.scaffoldBackgroundColor,
+            elevation: 0,
+            centerTitle: true,
+            title: const Text(
+              "Watchlist",
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkColor,
+              ),
+            ),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1.0),
+              child: Container(
+                color: const Color(0xFFE2D6CA),
+                height: 1.0,
+              ),
+            ),
+          ),
+          const SliverFillRemaining(
+            child: WatchListWidget(),
+          ),
+        ],
       ),
-      body: const WatchListWidget(),
     );
   }
 }

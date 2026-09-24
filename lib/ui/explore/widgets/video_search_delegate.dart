@@ -1,7 +1,6 @@
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/data/network/api/video_api_service.dart';
 import 'package:aurovilletv/ui/explore/cubit/search_cubit.dart';
-import 'package:aurovilletv/ui/video_player/video_player_screen.dart';
 import 'package:aurovilletv/ui/watchlist/widgets/video_cell_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,14 +51,10 @@ class VideoSearchDelegate extends SearchDelegate<VideoModel?> {
   }
 
   @override
-  PreferredSizeWidget? buildBottom(BuildContext context) {
-    return null;
-  }
+  PreferredSizeWidget? buildBottom(BuildContext context) => null;
 
   @override
-  Widget? buildFlexibleSpace(BuildContext context) {
-    return null;
-  }
+  Widget? buildFlexibleSpace(BuildContext context) => null;
 }
 
 class _SearchBody extends StatelessWidget {
@@ -98,26 +93,18 @@ class _SearchBody extends StatelessWidget {
           return const Center(child: Text("No videos found"));
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.only(top: 8),
-          itemCount: state.videos.length,
-          separatorBuilder: (_, _) =>
-              const Divider(height: 1, indent: 16, endIndent: 16),
-          itemBuilder: (context, index) {
-            final video = state.videos[index];
-
-            return VideoCellWidget(
-              video: video,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => VideoPlayerScreen(video: video),
-                  ),
-                );
-              },
-            );
-          },
+        return Container(
+          color: Colors.white,
+          child: ListView.separated(
+            padding: const EdgeInsets.only(top: 8),
+            itemCount: state.videos.length,
+            separatorBuilder: (_, _) =>
+                const Divider(height: 1, indent: 16, endIndent: 16),
+            itemBuilder: (context, index) {
+              final video = state.videos[index];
+              return VideoCellWidget(video: video, onTap: () {});
+            },
+          ),
         );
       },
     );

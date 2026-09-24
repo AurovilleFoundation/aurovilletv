@@ -67,7 +67,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   void _initializeVideo() async {
-    String url = _currentVideo.videoUrl.trim();
+    String url = _currentVideo.videoUrl?.trim() ?? '';
 
     // Fetch single video API details (Endpoint #10 in API docs)
     try {
@@ -77,8 +77,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           _currentVideo = fetchedVideo;
         });
       }
-      if (fetchedVideo.videoUrl.trim().isNotEmpty) {
-        url = fetchedVideo.videoUrl.trim();
+      if (fetchedVideo.videoUrl?.trim().isNotEmpty ?? false) {
+        url = fetchedVideo.videoUrl!.trim();
       }
     } catch (_) {}
 

@@ -9,6 +9,7 @@ import '../../models/live_stream_model.dart';
 
 class VideoApiServiceImpl implements VideoApiService {
   final DioClient dioClient;
+  static const String baseUrl = "https://aiis.auroville.org/api/method/register_of_residence.media.api.atv";
 
   VideoApiServiceImpl({required this.dioClient});
 
@@ -22,6 +23,7 @@ class VideoApiServiceImpl implements VideoApiService {
     };
   }
 
+  // ---------------- All Videos ----------------
   @override
   Future<List<VideoModel>> getAllVideos() async {
     try {
@@ -36,6 +38,7 @@ class VideoApiServiceImpl implements VideoApiService {
     }
   }
 
+  // ---------------- Category Videos ----------------
   @override
   Future<List<VideoModel>> getVideos({required String categoryId}) async {
     try {
@@ -44,13 +47,13 @@ class VideoApiServiceImpl implements VideoApiService {
         queryParameters: {"category_id": categoryId},
         options: Options(headers: _getHeaders()),
       );
-
       return _parseVideos(response.data);
     } on DioException catch (e) {
       throw Exception(_getErrorMessage(e));
     }
   }
 
+  // ---------------- Search ----------------
   @override
   Future<List<VideoModel>> searchVideos({required String keyword}) async {
     try {
@@ -59,13 +62,13 @@ class VideoApiServiceImpl implements VideoApiService {
         queryParameters: {"q": keyword},
         options: Options(headers: _getHeaders()),
       );
-
       return _parseVideos(response.data);
     } on DioException catch (e) {
       throw Exception(_getErrorMessage(e));
     }
   }
 
+  // ---------------- Live Stream (Continuous 24/7 + API status) ----------------
   @override
   Future<LiveStreamModel> getLiveStream({required String apiKey, required String apiSecret}) async {
     try {
@@ -130,6 +133,7 @@ class VideoApiServiceImpl implements VideoApiService {
     }
   }
 
+  // ---------------- Single Video By ID ----------------
   @override
   Future<VideoModel> getVideoById(String id) async {
     try {
@@ -152,6 +156,7 @@ class VideoApiServiceImpl implements VideoApiService {
     }
   }
 
+  // ---------------- Increment View Count ----------------
   @override
   Future<void> incrementViewCount(String id) async {
     try {
@@ -163,6 +168,7 @@ class VideoApiServiceImpl implements VideoApiService {
     } catch (_) {}
   }
 
+  // ---------------- Home Data ----------------
   @override
   Future<HomeDataModel> getHomeData() async {
     try {
@@ -184,17 +190,85 @@ class VideoApiServiceImpl implements VideoApiService {
     }
   }
 
+  // ---------------- Live Videos (From API Endpoint) ----------------
+  @override
+  Future<List<VideoModel>> getLiveVideos() async {
+    try {
+      final response = await _dio.get(
+        "$baseUrl.live",
+        options: Options(headers: _getHeaders()),
+      );
+
+      final liveList = _parseVideos(response.data);
+      if (liveList.isNotEmpty) {
+        return liveList;
+      }
+
+      // Fallback if API returns an empty list
+      return [
+        VideoModel(
+          id: "auroville_live",
+          title: "Auroville Foundation Live",
+          description: "Live stream from Auroville Foundation",
+          videoUrl: "https://aurovilletv.com/hls/education.m3u8",
+          thumbnail: "assets/images/thumb.png",
+          category: "Live",
+          publishDate: DateTime.now(),
+          isLive: true,
+          published: true,
+        ),
+      ];
+    } on DioException catch (e) {
+      throw Exception(_getErrorMessage(e));
+    } catch (e) {
+      throw Exception("Failed to load live video: $e");
+    }
+  }
+
+  // ---------------- Upcoming (local filter) ----------------
+  @override
+  Future<List<VideoModel>> getUpcomingVideos() async {
+    final all = await getAllVideos();
+    final now = DateTime.now();
+    return all
+        .where((v) => v.publishDate != null && v.publishDate!.isAfter(now))
+        .toList();
+  }
+
+  // ---------------- Ended (local filter) ----------------
+  @override
+  Future<List<VideoModel>> getEndedVideos() async {
+    final all = await getAllVideos();
+    final now = DateTime.now();
+    return all
+        .where((v) => v.publishDate != null && v.publishDate!.isBefore(now))
+        .toList();
+  }
+
+  // ---------------- Helpers ----------------
   List<VideoModel> _parseVideos(dynamic json) {
-    if (json is Map<String, dynamic> && json.containsKey('message')) {
-      final message = json['message'];
-      if (message is Map<String, dynamic> && message.containsKey('data')) {
-        final data = message['data'];
-        if (data is Map<String, dynamic> && data.containsKey('items')) {
-          final List list = data['items'] as List;
-          return list.map((e) => VideoModel.fromApi(Map<String, dynamic>.from(e as Map))).toList();
-        }
+    if (json == null) return [];
+    dynamic data;
+    if (json is Map && json.containsKey("message")) {
+      final message = json["message"];
+      if (message is Map && message.containsKey("data")) {
+        data = message["data"];
       }
     }
+    dynamic items;
+
+    if (data is Map && data.containsKey("items")) {
+      items = data["items"];
+    } else if (data is List) {
+      items = data;
+    } else if (json is Map && json["message"] is List) {
+      items = json["message"];
+    }
+
+    if (items is List) {
+      return items.map((e) => VideoModel.fromMap(Map<String, dynamic>.from(e as Map))).toList();
+    }
+
     return [];
   }
 
@@ -202,19 +276,14 @@ class VideoApiServiceImpl implements VideoApiService {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
         return "Connection timeout";
-
       case DioExceptionType.sendTimeout:
         return "Request timeout";
-
       case DioExceptionType.receiveTimeout:
         return "Server timeout";
-
       case DioExceptionType.connectionError:
         return "No internet connection";
-
       case DioExceptionType.badResponse:
         return e.response?.data["message"] ?? "Server error";
-
       default:
         return e.message ?? "Something went wrong";
     }

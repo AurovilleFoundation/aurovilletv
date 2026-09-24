@@ -12,7 +12,7 @@ final class LoadExplore extends ExploreEvent {
   const LoadExplore();
 }
 
-/// User selected category
+/// User selected category by ID (from DB)
 final class CategoryChanged extends ExploreEvent {
   final String categoryId;
 
@@ -25,4 +25,14 @@ final class CategoryChanged extends ExploreEvent {
 /// Pull to refresh
 final class RefreshExplore extends ExploreEvent {
   const RefreshExplore();
+}
+
+/// 👉 Filter by category (All, Live, Upcoming, Ended)
+final class FilterByCategory extends ExploreEvent {
+  final String category; // "All", "Live", "Upcoming", "Ended"
+
+  const FilterByCategory(this.category);
+
+  @override
+  List<Object?> get props => [category];
 }

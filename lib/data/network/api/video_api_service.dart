@@ -23,4 +23,13 @@ abstract class VideoApiService {
 
   /// Get home page data
   Future<HomeDataModel> getHomeData();
+
+  /// Returns live videos
+  Future<List<VideoModel>> getLiveVideos();
+
+  /// Returns upcoming videos
+  Future<List<VideoModel>> getUpcomingVideos();
+
+  /// Returns ended videos
+  Future<List<VideoModel>> getEndedVideos();
 }

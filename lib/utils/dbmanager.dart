@@ -7,17 +7,15 @@ class DBManager {
   DBManager._();
 
   static final DBManager instance = DBManager._();
-
   static Database? _database;
 
   static const String _databaseName = 'auroville_tv.db';
-  static const int _databaseVersion = 3;
+  static const int _databaseVersion = 4; // Bumped version to recreate schema cleanly
   static const String watchListTable = 'watchlist';
+  static const String categoriesTable = 'categories';
 
   Future<Database> get database async {
-    if (_database != null) {
-      return _database!;
-    }
+    if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
@@ -34,78 +32,101 @@ class DBManager {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // ---------------- Watchlist Table Creation ----------------
     await db.execute('''
       CREATE TABLE $watchListTable (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         description TEXT NOT NULL,
-        video_url TEXT NOT NULL,
-        thumbnail TEXT NOT NULL,
-        category_id TEXT NOT NULL,
-        date_time TEXT NOT NULL,
-        featured INTEGER NOT NULL,
-        view_count INTEGER NOT NULL
+        video_url TEXT,
+        thumbnail TEXT,
+        category TEXT,
+        publish_date TEXT,
+        upload_date TEXT,
+        duration_minutes INTEGER,
+        topic_tag TEXT,
+        featured INTEGER NOT NULL DEFAULT 0,
+        view_count INTEGER NOT NULL DEFAULT 0,
+        is_live INTEGER NOT NULL DEFAULT 0,
+        published INTEGER NOT NULL DEFAULT 0,
+        watched_at TEXT
       )
     ''');
 
-    // Categories Table
+    // ---------------- Categories Table Creation ----------------
     await db.execute('''
-    CREATE TABLE event_categories (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL
-    )
+      CREATE TABLE $categoriesTable (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL
+      )
     ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 3) {
-      await db.execute('DROP TABLE IF EXISTS $watchListTable');
-      await db.execute('DROP TABLE IF EXISTS event_categories');
-      await _onCreate(db, newVersion);
-    }
+    // Drop old table to clean up constraint mismatches
+    await db.execute('DROP TABLE IF EXISTS $watchListTable');
+    await db.execute('DROP TABLE IF EXISTS $categoriesTable');
+    await _onCreate(db, newVersion);
   }
 
-  /// Get all locally stored videos from sqflite
-  Future<List<VideoModel>> getVideos() async {
+  // ==========================================
+  // ---------------- Watchlist / History -----
+  // ==========================================
+
+  Future<List<VideoModel>> getWatchList() async {
     final db = await database;
-    // Clean up any legacy dummy videos if present
-    await db.delete(watchListTable, where: "id IN ('1', '2', '3', '4', '5')");
-    final result = await db.query(watchListTable, orderBy: 'date_time DESC');
+    final result = await db.query(
+      watchListTable,
+      orderBy: 'COALESCE(watched_at, publish_date) DESC',
+    );
     return result.map(VideoModel.fromMap).toList();
   }
 
-  /// Alias for getVideos
-  Future<List<VideoModel>> getWatchList() async => getVideos();
+  /// Alias for getWatchList
+  Future<List<VideoModel>> getVideos() async => getWatchList();
 
-  /// Used to store a video data into sqflite
-  Future<void> saveVideo(VideoModel video) async {
+  /// Inserts video with timestamp safely
+  Future<void> addVideo(VideoModel video) async {
     final db = await database;
+    final map = Map<String, dynamic>.from(video.toMap());
+    map['watched_at'] = DateTime.now().toIso8601String();
 
     await db.insert(
       watchListTable,
-      video.toMap(),
+      map,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  /// Alias for saveVideo
-  Future<void> addVideo(VideoModel video) async => saveVideo(video);
+  /// Alias for addVideo
+  Future<void> saveVideo(VideoModel video) async => addVideo(video);
+
+  /// Same as addVideo (for recording watch history)
+  Future<void> recordVideoWatch(VideoModel video) async {
+    await addVideo(video);
+  }
 
   Future<void> removeVideo(String id) async {
     final db = await database;
-    await db.delete(watchListTable, where: 'id = ?', whereArgs: [id]);
+    await db.delete(
+      watchListTable,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> removeFromHistory(String id) async {
+    await removeVideo(id);
   }
 
   Future<bool> isInWatchList(String id) async {
     final db = await database;
-
     final result = await db.query(
       watchListTable,
       where: 'id = ?',
       whereArgs: [id],
       limit: 1,
     );
-
     return result.isNotEmpty;
   }
 
@@ -114,48 +135,46 @@ class DBManager {
     await db.delete(watchListTable);
   }
 
+  Future<void> clearWatchHistory() async {
+    await clearWatchList();
+  }
+
+  // ==========================================
+  // ---------------- Categories --------------
+  // ==========================================
+
   Future<List<CategoryModel>> getCategories() async {
     final db = await database;
-
-    final result = await db.query('event_categories', orderBy: 'name ASC');
-
+    final result = await db.query(categoriesTable, orderBy: 'name ASC');
     return result.map((e) => CategoryModel.fromMap(e)).toList();
   }
 
   Future<void> insertCategories(List<CategoryModel> categories) async {
     final db = await database;
-
     final batch = db.batch();
-
     for (final category in categories) {
       batch.insert(
-        'event_categories',
+        categoriesTable,
         category.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
-
     await batch.commit(noResult: true);
   }
 
   Future<void> clearCategories() async {
     final db = await database;
-
-    await db.delete('event_categories');
+    await db.delete(categoriesTable);
   }
 
   Future<void> replaceCategories(List<CategoryModel> categories) async {
     final db = await database;
-
     await db.transaction((txn) async {
-      await txn.delete('event_categories');
-
+      await txn.delete(categoriesTable);
       final batch = txn.batch();
-
       for (final category in categories) {
-        batch.insert('event_categories', category.toMap());
+        batch.insert(categoriesTable, category.toMap());
       }
-
       await batch.commit(noResult: true);
     });
   }
