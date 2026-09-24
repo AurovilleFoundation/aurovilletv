@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 
@@ -72,5 +73,73 @@ void main() {
       expect(json['title'], 'Updated');
       expect(json['id'], '1');
     });
+
+    testWidgets('Explore card layout: title at top and arrow vertically in middle', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 380,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    width: 175,
+                    height: 125,
+                    child: Placeholder(),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text('Test Title', key: Key('title')),
+                          SizedBox(height: 6),
+                          Text('Spiritual', key: Key('subtitle')),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const SizedBox(
+                    height: 125,
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 8.0),
+                        child: Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          key: Key('arrow'),
+                          size: 16,
+                          color: Color(0xFFBDBDBD),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final titleTop = tester.getTopLeft(find.byKey(const Key('title'))).dy;
+      final cardTop = tester.getTopLeft(find.byType(Placeholder)).dy;
+      final arrowCenter = tester.getCenter(find.byKey(const Key('arrow'))).dy;
+      final placeholderCenter = tester.getCenter(find.byType(Placeholder)).dy;
+
+      // Title is pinned to the top with 4.0px padding
+      expect(titleTop - cardTop, equals(4.0));
+
+      // Arrow is vertically centered matching the thumbnail/card center (within 0.5px)
+      expect((arrowCenter - placeholderCenter).abs(), lessThan(1.0));
+      
+      // Arrow size is 16
+      final icon = tester.widget<Icon>(find.byKey(const Key('arrow')));
+      expect(icon.size, 16.0);
+    });
   });
 }
+

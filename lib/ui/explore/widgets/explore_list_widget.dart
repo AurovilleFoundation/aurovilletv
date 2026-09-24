@@ -117,24 +117,24 @@ class ExploreListWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   onTap: () => _navigateToVideo(context, video),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Video Thumbnail Box
                       SizedBox(
-                        width: 165,
-                        height: 115,
+                        width: 175,
+                        height: 125,
                         child: Stack(
                           children: [
                             Positioned.fill(
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(18),
+                                borderRadius: BorderRadius.circular(20),
                                 child: _buildThumbnail(video.thumbnail),
                               ),
                             ),
                             Positioned.fill(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(18),
+                                  borderRadius: BorderRadius.circular(20),
                                   gradient: LinearGradient(
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
@@ -148,19 +148,19 @@ class ExploreListWidget extends StatelessWidget {
                             ),
                             // Play Icon (Bottom Left)
                             const Positioned(
-                              left: 8,
-                              bottom: 8,
+                              left: 10,
+                              bottom: 10,
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsets.all(5.0),
+                                  padding: EdgeInsets.all(6.0),
                                   child: Icon(
                                     Icons.play_arrow_rounded,
                                     color: Colors.black87,
-                                    size: 18,
+                                    size: 20,
                                   ),
                                 ),
                               ),
@@ -168,12 +168,12 @@ class ExploreListWidget extends StatelessWidget {
                             // Live Tag (Top Right)
                             if (video.isLive)
                               Positioned(
-                                top: 8,
-                                right: 8,
+                                top: 10,
+                                right: 10,
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
+                                    horizontal: 7,
+                                    vertical: 3,
                                   ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFE53935),
@@ -213,39 +213,47 @@ class ExploreListWidget extends StatelessWidget {
 
                       const SizedBox(width: 14),
 
-                      // Title & Subtitle Area (Vertically Centered)
+                      // Title & Subtitle Area (Top-Aligned)
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              video.title,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E1E1E),
-                                height: 1.25,
-                                letterSpacing: -0.2,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                video.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF1E1E1E),
+                                  height: 1.25,
+                                  letterSpacing: -0.2,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            _VideoMetaSubtitle(video: video),
-                          ],
+                              const SizedBox(height: 6),
+                              _VideoMetaSubtitle(video: video),
+                            ],
+                          ),
                         ),
                       ),
 
                       const SizedBox(width: 8),
 
-                      // Navigation Arrow (Vertically Centered)
-                      const Padding(
-                        padding: EdgeInsets.only(right: 6.0),
-                        child: Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                          color: Color(0xFF9E9E9E),
+                      // Navigation Arrow (Middle-Aligned, Size 16)
+                      const SizedBox(
+                        height: 125,
+                        child: Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 8.0),
+                            child: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 16,
+                              color: Color(0xFFBDBDBD),
+                            ),
+                          ),
                         ),
                       ),
                     ],
