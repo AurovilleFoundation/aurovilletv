@@ -151,7 +151,7 @@ class _LiveDetailScreenState extends State<LiveDetailScreen>
         _controller?.pause();
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.backgroundLight,
         appBar: AppBar(
           backgroundColor: Colors.black,
           elevation: 0,
@@ -172,9 +172,236 @@ class _LiveDetailScreenState extends State<LiveDetailScreen>
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        body: Center(
-          child: _buildVideoPlayer(),
+        body: Column(
+          children: [
+            // Video Player at Top
+            _buildVideoPlayer(),
+
+            // Live Stream Details below
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildStreamInfoCard(),
+                    const SizedBox(height: 16),
+                    _buildActionButtons(),
+                    const SizedBox(height: 16),
+                    _buildDescriptionCard(),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStreamInfoCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade600,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FadeTransition(
+                      opacity: _pulseController,
+                      child: Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Text(
+                      "LIVE NOW",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (widget.liveStream.category.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.themeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    widget.liveStream.category,
+                    style: const TextStyle(
+                      color: AppColors.themeColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
+              if (widget.liveStream.viewerCount > 0) ...[
+                const Spacer(),
+                Icon(Icons.remove_red_eye_rounded,
+                    size: 16, color: Colors.grey.shade600),
+                const SizedBox(width: 4),
+                Text(
+                  "${widget.liveStream.viewerCount} watching",
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            widget.liveStream.title.isNotEmpty
+                ? widget.liveStream.title
+                : "Auroville Live Broadcast",
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: AppColors.darkColor,
+              height: 1.3,
+            ),
+          ),
+          if (widget.liveStream.publishDate.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              "Started: ${widget.liveStream.publishDate}",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: _openFullScreen,
+            icon: const Icon(Icons.fullscreen_rounded, size: 20),
+            label: const Text("Fullscreen"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.themeColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 1,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _toggleMute,
+            icon: Icon(
+              _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+              size: 20,
+              color: AppColors.darkColor,
+            ),
+            label: Text(
+              _isMuted ? "Unmute" : "Mute Audio",
+              style: const TextStyle(color: AppColors.darkColor),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              side: BorderSide(color: Colors.grey.shade300),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              backgroundColor: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDescriptionCard() {
+    final description = widget.liveStream.description.trim();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "About Broadcast",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.darkColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            description.isNotEmpty
+                ? description
+                : "Live stream broadcast from Auroville Foundation. Streaming ongoing sessions, talks, and community events directly from Auroville.",
+            style: TextStyle(
+              fontSize: 13.5,
+              color: Colors.grey.shade700,
+              height: 1.45,
+            ),
+          ),
+        ],
       ),
     );
   }
