@@ -338,15 +338,17 @@ class SearchScreen extends StatelessWidget {
 
                                   const SizedBox(width: 8),
 
-                                  // Navigation Arrow (Vertically Centered & 8px Inset)
-                                  const Align(
-                                    alignment: Alignment.center,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 8.0),
-                                      child: Icon(
-                                        Icons.arrow_forward_ios_rounded,
-                                        size: 16,
-                                        color: Color(0xFFBDBDBD),
+                                  // Navigation Arrow (Truly Vertically Centered & Visible)
+                                  const SizedBox(
+                                    height: 125,
+                                    child: Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(right: 8.0),
+                                        child: Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 18,
+                                          color: Color(0xFF757575),
+                                        ),
                                       ),
                                     ),
                                   ),
