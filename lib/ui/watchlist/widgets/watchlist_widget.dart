@@ -234,7 +234,7 @@ class WatchListWidget extends StatelessWidget {
                             _VideoMetaSubtitle(video: video),
                             const SizedBox(height: 8),
                             // Details Screen Navigate Button
-                            DetailViewBtn(videoId: video.id),
+                            DetailViewBtn(videoId: video.id, video: video),
                           ],
                         ),
                       ),

@@ -4,7 +4,7 @@ import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/ui/explore/bloc/explore_bloc.dart';
 import 'package:aurovilletv/ui/home/cubit/home_cubit.dart';
 import 'package:aurovilletv/ui/main/bloc/navigation_bloc.dart';
-import 'package:aurovilletv/ui/video_player/video_player_screen.dart';
+import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import 'package:aurovilletv/ui/widgets/video_placeholder_widget.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -372,7 +372,7 @@ class _HomeLoadedWidget extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => VideoPlayerScreen(video: video),
+            builder: (_) => VideoDetailsScreen(video: video),
           ),
         );
       },
@@ -467,7 +467,7 @@ class _HomeLoadedWidget extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => VideoPlayerScreen(video: video),
+            builder: (_) => VideoDetailsScreen(video: video),
           ),
         );
       },
@@ -571,7 +571,7 @@ class _HomeLoadedWidget extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => VideoPlayerScreen(video: video),
+            builder: (_) => VideoDetailsScreen(video: video),
           ),
         );
       },

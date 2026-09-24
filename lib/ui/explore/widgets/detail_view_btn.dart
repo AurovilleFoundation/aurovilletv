@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:aurovilletv/data/models/video_model.dart';
 import '../../video_details/video_details_screen.dart';
 
 class DetailViewBtn extends StatelessWidget {
   final String videoId;
+  final VideoModel? video;
 
   const DetailViewBtn({
     super.key,
     required this.videoId,
+    this.video,
   });
 
   @override
@@ -17,7 +20,10 @@ class DetailViewBtn extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => VideoDetailsScreen(videoId: videoId),
+            builder: (_) => VideoDetailsScreen(
+              videoId: videoId,
+              video: video,
+            ),
           ),
         );
       },

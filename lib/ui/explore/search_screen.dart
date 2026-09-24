@@ -286,7 +286,7 @@ class SearchScreen extends StatelessWidget {
                                     _SearchVideoSubtitle(video: video),
                                     if (!video.isLive) ...[
                                       const SizedBox(height: 8),
-                                      DetailViewBtn(videoId: video.id),
+                                      DetailViewBtn(videoId: video.id, video: video),
                                     ],
                                   ],
                                 ),
