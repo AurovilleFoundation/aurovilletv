@@ -182,18 +182,18 @@ class SearchScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                               onTap: navigateToVideo,
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   // Thumbnail Box
                                   SizedBox(
-                                    width: 175,
-                                    height: 125,
+                                    width: 165,
+                                    height: 115,
                                     child: Stack(
                                       children: [
                                         Positioned.fill(
                                           child: ClipRRect(
                                             borderRadius:
-                                                BorderRadius.circular(20),
+                                                BorderRadius.circular(18),
                                             child: video.thumbnail.isNotEmpty &&
                                                     video.thumbnail.startsWith('http')
                                                 ? Image.network(
@@ -221,7 +221,7 @@ class SearchScreen extends StatelessWidget {
                                           child: Container(
                                             decoration: BoxDecoration(
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  BorderRadius.circular(18),
                                               gradient: LinearGradient(
                                                 begin: Alignment.topCenter,
                                                 end: Alignment.bottomCenter,
@@ -235,32 +235,32 @@ class SearchScreen extends StatelessWidget {
                                           ),
                                         ),
                                         const Positioned(
-                                          left: 10,
-                                          bottom: 10,
+                                          left: 8,
+                                          bottom: 8,
                                           child: DecoratedBox(
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               shape: BoxShape.circle,
                                             ),
                                             child: Padding(
-                                              padding: EdgeInsets.all(6.0),
+                                              padding: EdgeInsets.all(5.0),
                                               child: Icon(
                                                 Icons.play_arrow_rounded,
                                                 color: Colors.black87,
-                                                size: 20,
+                                                size: 18,
                                               ),
                                             ),
                                           ),
                                         ),
                                         if (video.isLive)
                                           Positioned(
-                                            top: 10,
-                                            right: 10,
+                                            top: 8,
+                                            right: 8,
                                             child: Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 7,
-                                                vertical: 3,
+                                                horizontal: 6,
+                                                vertical: 2,
                                               ),
                                               decoration: BoxDecoration(
                                                 color:
@@ -309,47 +309,38 @@ class SearchScreen extends StatelessWidget {
 
                                   // Details Info
                                   Expanded(
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(top: 4.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            video.title,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w700,
-                                              color: Color(0xFF1E1E1E),
-                                              height: 1.25,
-                                              letterSpacing: -0.2,
-                                            ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          video.title,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFF1E1E1E),
+                                            height: 1.25,
+                                            letterSpacing: -0.2,
                                           ),
-                                          const SizedBox(height: 6),
-                                          _SearchVideoSubtitle(video: video),
-                                        ],
-                                      ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        _SearchVideoSubtitle(video: video),
+                                      ],
                                     ),
                                   ),
 
                                   const SizedBox(width: 8),
 
-                                  // Navigation Arrow (Truly Vertically Centered & Visible)
-                                  const SizedBox(
-                                    height: 125,
-                                    child: Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.only(right: 8.0),
-                                        child: Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          size: 18,
-                                          color: Color(0xFF757575),
-                                        ),
-                                      ),
+                                  // Navigation Arrow (Vertically Centered)
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 6.0),
+                                    child: Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 16,
+                                      color: Color(0xFF9E9E9E),
                                     ),
                                   ),
                                 ],
