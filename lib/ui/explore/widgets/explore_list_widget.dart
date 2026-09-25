@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import '../bloc/explore_bloc.dart';
@@ -12,17 +13,15 @@ class ExploreListWidget extends StatelessWidget {
   Widget _buildThumbnail(String thumbnail) {
     final String imageUrl = thumbnail.trim();
 
-    // 1. If empty or points to an asset, load local thumb.png
     if (imageUrl.isEmpty || imageUrl.startsWith('assets/')) {
       return _buildLocalThumb();
     }
 
-    // 2. If valid full HTTP/HTTPS URL, load network image with fallback
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return Image.network(
         imageUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildLocalThumb(),
+        errorBuilder: (context, error, stackTrace) => _buildLocalThumb(),
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return _buildLocalThumb();
@@ -30,7 +29,6 @@ class ExploreListWidget extends StatelessWidget {
       );
     }
 
-    // 3. Fallback for all other cases
     return _buildLocalThumb();
   }
 
@@ -38,7 +36,7 @@ class ExploreListWidget extends StatelessWidget {
     return Image.asset(
       _defaultAssetThumb,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Container(
+      errorBuilder: (context, error, stackTrace) => Container(
         color: const Color(0xFFEADBCE),
         child: const Center(
           child: Icon(
@@ -66,14 +64,12 @@ class ExploreListWidget extends StatelessWidget {
       buildWhen: (previous, current) =>
           previous.isLoading != current.isLoading ||
           previous.videos != current.videos ||
+          previous.selectedCategory != current.selectedCategory ||
           previous.errorMessage != current.errorMessage,
       builder: (context, state) {
-        if (state.isLoading && state.videos.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Color(0xFFC85A17),
-            ),
-          );
+        // Slow Network அல்லது Refresh ஆகும் போது தோன்றும் Circular Progress + Grey Shimmer UI
+        if (state.isLoading) {
+          return const _ExploreLoadingSkeleton();
         }
 
         if (state.errorMessage != null && state.videos.isEmpty) {
@@ -81,13 +77,14 @@ class ExploreListWidget extends StatelessWidget {
         }
 
         if (state.videos.isEmpty) {
-          return const _EmptyWidget();
+          return _EmptyWidget(category: state.selectedCategory);
         }
 
         return ListView.separated(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           itemCount: state.videos.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 20),
+          separatorBuilder: (context, index) => const SizedBox(height: 20),
           itemBuilder: (context, index) {
             final video = state.videos[index];
 
@@ -247,6 +244,120 @@ class ExploreListWidget extends StatelessWidget {
     );
   }
 }
+
+// ---------------- Grey Skeleton Loader with Top Circle ----------------
+class _ExploreLoadingSkeleton extends StatelessWidget {
+  const _ExploreLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Top Center Progress Indicator
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 14.0),
+          child: SizedBox(
+            height: 26,
+            width: 26,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.8,
+              color: Color(0xFFC85A17),
+            ),
+          ),
+        ),
+
+        // Grey Video Cards Skeleton
+        Expanded(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              itemCount: 5,
+              separatorBuilder: (context, index) => const SizedBox(height: 20),
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  height: 125,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Grey Thumbnail Box Skeleton
+                      Container(
+                        width: 200,
+                        height: 125,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      // Grey Texts Skeleton
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 16,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 16,
+                                width: 110,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Container(
+                                height: 12,
+                                width: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // Grey Arrow Skeleton
+                      const Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _VideoMetaSubtitle extends StatelessWidget {
   final VideoModel video;
 
@@ -286,14 +397,16 @@ class _VideoMetaSubtitle extends StatelessWidget {
 }
 
 class _EmptyWidget extends StatelessWidget {
-  const _EmptyWidget();
+  final String category;
+
+  const _EmptyWidget({this.category = "All"});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
-        "No Videos Found",
-        style: TextStyle(
+        "No $category Videos Found",
+        style: const TextStyle(
           color: Colors.grey,
           fontSize: 15,
           fontWeight: FontWeight.w500,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import '../bloc/watchlist_bloc.dart';
@@ -20,7 +21,7 @@ class WatchListWidget extends StatelessWidget {
       return Image.network(
         imageUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _buildLocalThumb(),
+        errorBuilder: (context, error, stackTrace) => _buildLocalThumb(),
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return _buildLocalThumb();
@@ -35,7 +36,7 @@ class WatchListWidget extends StatelessWidget {
     return Image.asset(
       _defaultAssetThumb,
       fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => Container(
+      errorBuilder: (context, error, stackTrace) => Container(
         color: const Color(0xFFEADBCE),
         child: const Center(
           child: Icon(
@@ -61,20 +62,18 @@ class WatchListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<WatchListBloc, WatchListState>(
       builder: (context, state) {
+        // Slow Connection அல்லது Refresh ஆகும்போது Explore போன்ற அதே Skeleton Loader
         if (state is WatchListLoading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Color(0xFFC85A17),
-            ),
-          );
+          return const _WatchlistLoadingSkeleton();
         }
 
+        // Internet இல்லாத போது எந்த வீடியோவும் வராமல் முழு Retry View மட்டும் தோன்றும்
         if (state is WatchListError) {
-          return Center(
-            child: Text(
-              state.message,
-              style: const TextStyle(color: Colors.red),
-            ),
+          return _WatchListErrorWidget(
+            message: state.message,
+            onRetry: () {
+              context.read<WatchListBloc>().add(const RefreshWatchList());
+            },
           );
         }
 
@@ -92,7 +91,7 @@ class WatchListWidget extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               itemCount: state.videos.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 20),
+              separatorBuilder: (context, index) => const SizedBox(height: 20),
               itemBuilder: (context, index) {
                 final video = state.videos[index];
 
@@ -161,7 +160,7 @@ class WatchListWidget extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  // Play Icon (Bottom Left)
+                                  // Play Icon
                                   const Positioned(
                                     left: 10,
                                     bottom: 10,
@@ -180,7 +179,7 @@ class WatchListWidget extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  // Live Tag (Top Right)
+                                  // Live Tag
                                   if (video.isLive)
                                     Positioned(
                                       top: 10,
@@ -257,7 +256,7 @@ class WatchListWidget extends StatelessWidget {
 
                             const SizedBox(width: 8),
 
-                            // Navigation Arrow (Vertically Centered & 8px Inset)
+                            // Navigation Arrow
                             const Align(
                               alignment: Alignment.center,
                               child: Padding(
@@ -282,6 +281,194 @@ class WatchListWidget extends StatelessWidget {
 
         return const SizedBox.shrink();
       },
+    );
+  }
+}
+
+// ---------------- Grey Skeleton Loader with Top Circle ----------------
+class _WatchlistLoadingSkeleton extends StatelessWidget {
+  const _WatchlistLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Top Center Progress Indicator
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 14.0),
+          child: SizedBox(
+            height: 26,
+            width: 26,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.8,
+              color: Color(0xFFC85A17),
+            ),
+          ),
+        ),
+
+        // Grey Video Cards Skeleton
+        Expanded(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              itemCount: 5,
+              separatorBuilder: (context, index) => const SizedBox(height: 20),
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  height: 125,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Grey Thumbnail Box Skeleton
+                      Container(
+                        width: 200,
+                        height: 125,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      // Grey Texts Skeleton
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 16,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 16,
+                                width: 110,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Container(
+                                height: 12,
+                                width: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // Grey Arrow Skeleton
+                      const Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------- Offline / Retry Widget ----------------
+class _WatchListErrorWidget extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _WatchListErrorWidget({
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFC85A17).withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.wifi_off_rounded,
+                size: 48,
+                color: Color(0xFFC85A17),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "No Internet Connection",
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1E1E1E),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message.isNotEmpty
+                  ? message
+                  : "Please check your network settings and try again.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 13.5,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFC85A17),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+              label: const Text(
+                "Retry",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
