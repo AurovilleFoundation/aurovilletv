@@ -1,3 +1,4 @@
+import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'video_details_event.dart';
 import 'video_details_state.dart';
@@ -13,13 +14,55 @@ class VideoDetailsBloc extends Bloc<VideoDetailsEvent, VideoDetailsState> {
 
   Future<void> _onLoadVideoDetails(
       LoadVideoDetails event, Emitter<VideoDetailsState> emit) async {
-    emit(VideoDetailsLoading());
+    if (event.initialVideo is VideoModel) {
+      emit(VideoDetailsLoaded(video: event.initialVideo as VideoModel));
+    } else {
+      emit(VideoDetailsLoading());
+    }
+
     try {
+      // Increment view count in background
+      apiService.incrementViewCount(event.videoId);
+
+      try {
+        final video = await apiService.getVideoById(event.videoId);
+        emit(VideoDetailsLoaded(video: video));
+        return;
+      } catch (_) {}
+
       final videos = await apiService.getAllVideos();
-      final video = videos.firstWhere((v) => v.id == event.videoId);
-      emit(VideoDetailsLoaded(video: video));
+      final targetId = event.videoId.trim().toLowerCase();
+
+      VideoModel? video;
+      for (final v in videos) {
+        if (v.id.trim().toLowerCase() == targetId) {
+          video = v;
+          break;
+        }
+      }
+
+      if (video != null) {
+        emit(VideoDetailsLoaded(video: video));
+      } else {
+        VideoModel? fallbackVideo;
+        for (final v in videos) {
+          if (v.title.toLowerCase().contains(targetId)) {
+            fallbackVideo = v;
+            break;
+          }
+        }
+        if (fallbackVideo != null) {
+          emit(VideoDetailsLoaded(video: fallbackVideo));
+        } else if (videos.isNotEmpty) {
+          emit(VideoDetailsLoaded(video: videos.first));
+        } else {
+          emit(const VideoDetailsError(message: "Video details not found."));
+        }
+      }
     } catch (e) {
-      emit(VideoDetailsError(message: e.toString()));
+      if (state is! VideoDetailsLoaded) {
+        emit(VideoDetailsError(message: e.toString()));
+      }
     }
   }
 }

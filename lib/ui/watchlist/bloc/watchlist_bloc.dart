@@ -23,7 +23,7 @@ class WatchListBloc extends Bloc<WatchListEvent, WatchListState> {
     emit(const WatchListLoading());
 
     try {
-      final videos = await dbManager.getWatchList();
+      final videos = await dbManager.getVideos();
       emit(WatchListLoaded(videos));
     } catch (e) {
       emit(WatchListError(e.toString()));
@@ -35,7 +35,7 @@ class WatchListBloc extends Bloc<WatchListEvent, WatchListState> {
     Emitter<WatchListState> emit,
   ) async {
     try {
-      final videos = await dbManager.getWatchList();
+      final videos = await dbManager.getVideos();
 
       emit(WatchListLoaded(videos));
     } catch (e) {
@@ -45,8 +45,8 @@ class WatchListBloc extends Bloc<WatchListEvent, WatchListState> {
 
   Future<void> _onAddVideo(AddVideo event, Emitter<WatchListState> emit) async {
     try {
-      await dbManager.addVideo(event.video);
-      final videos = await dbManager.getWatchList();
+      await dbManager.saveVideo(event.video);
+      final videos = await dbManager.getVideos();
       emit(WatchListLoaded(videos));
     } catch (e) {
       emit(WatchListError(e.toString()));
@@ -59,7 +59,7 @@ class WatchListBloc extends Bloc<WatchListEvent, WatchListState> {
   ) async {
     try {
       await dbManager.removeVideo(event.videoId);
-      final videos = await dbManager.getWatchList();
+      final videos = await dbManager.getVideos();
       emit(WatchListLoaded(videos));
     } catch (e) {
       emit(WatchListError(e.toString()));

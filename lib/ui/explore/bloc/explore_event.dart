@@ -14,7 +14,7 @@ final class LoadExplore extends ExploreEvent {
 
 /// User selected category by ID (from DB)
 final class CategoryChanged extends ExploreEvent {
-  final int categoryId;
+  final String categoryId;
 
   const CategoryChanged(this.categoryId);
 

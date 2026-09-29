@@ -3,7 +3,7 @@ part of 'explore_bloc.dart';
 class ExploreState extends Equatable {
   final bool isLoading;
   final List<CategoryModel> categories;
-  final int selectedCategoryId;
+  final String selectedCategoryId;
   final List<VideoModel> videos;
   final String selectedCategory; // 👉 new field for All/Live/Upcoming/Ended
   final String? errorMessage;
@@ -11,7 +11,7 @@ class ExploreState extends Equatable {
   const ExploreState({
     this.isLoading = false,
     this.categories = const [],
-    this.selectedCategoryId = 0,
+    this.selectedCategoryId = "",
     this.videos = const [],
     this.selectedCategory = "All", // ✅ default tab
     this.errorMessage,
@@ -20,7 +20,7 @@ class ExploreState extends Equatable {
   ExploreState copyWith({
     bool? isLoading,
     List<CategoryModel>? categories,
-    int? selectedCategoryId,
+    String? selectedCategoryId,
     List<VideoModel>? videos,
     String? selectedCategory,
     String? errorMessage,

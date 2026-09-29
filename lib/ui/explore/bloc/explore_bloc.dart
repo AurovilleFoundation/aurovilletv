@@ -38,7 +38,7 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
           isLoading: false,
           categories: categories,
           selectedCategory: "All",
-          selectedCategoryId: 0,
+          selectedCategoryId: "0",
           videos: videos,
         ),
       );
@@ -63,7 +63,7 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
     );
 
     try {
-      final videos = event.categoryId == 0
+      final videos = (event.categoryId == "0" || event.categoryId.isEmpty)
           ? await apiService.getAllVideos()
           : await apiService.getVideos(categoryId: event.categoryId);
 
@@ -94,7 +94,7 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
           videos = await apiService.getEndedVideos();
           break;
         default:
-          videos = state.selectedCategoryId == 0
+          videos = (state.selectedCategoryId == "0" || state.selectedCategoryId.isEmpty)
               ? await apiService.getAllVideos()
               : await apiService.getVideos(categoryId: state.selectedCategoryId);
       }

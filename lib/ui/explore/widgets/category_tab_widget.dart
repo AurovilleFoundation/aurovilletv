@@ -13,16 +13,15 @@ class CategoryTabWidget extends StatelessWidget {
       buildWhen: (previous, current) =>
           previous.selectedCategory != current.selectedCategory,
       builder: (context, state) {
-        return Container(
+        return SizedBox(
           height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: _tabs.map((label) {
               final isSelected = state.selectedCategory == label;
 
               return Expanded(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(24),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () {
                     if (!isSelected) {
                       context.read<ExploreBloc>().add(
@@ -34,6 +33,7 @@ class CategoryTabWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Spacer(),
+                      // Instant Text (No animation delay)
                       Text(
                         label,
                         textAlign: TextAlign.center,
@@ -43,12 +43,13 @@ class CategoryTabWidget extends StatelessWidget {
                               isSelected ? FontWeight.w700 : FontWeight.w500,
                           color: isSelected
                               ? const Color(0xFFC85A17)
-                              : const Color.fromARGB(255, 0, 0, 0),
+                              : Colors.black,
                         ),
                       ),
                       const Spacer(),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
+
+                      // Instant Underline (0ms delay)
+                      Container(
                         height: 2.5,
                         width: isSelected ? 36 : 0,
                         decoration: BoxDecoration(

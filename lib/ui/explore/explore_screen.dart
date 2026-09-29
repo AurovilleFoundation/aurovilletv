@@ -38,7 +38,8 @@ class _ExploreView extends StatelessWidget {
       stream: Connectivity().onConnectivityChanged,
       builder: (context, snapshot) {
         final List<ConnectivityResult> results = snapshot.data ?? [];
-        final bool isConnected = !snapshot.hasData ||
+        final bool isConnected =
+            !snapshot.hasData ||
             results.any((result) => result != ConnectivityResult.none);
 
         return Scaffold(
@@ -101,13 +102,11 @@ class _ExploreView extends StatelessWidget {
                     child: Column(
                       children: [
                         CategoryTabWidget(),
-                        Divider(height: 1),
+                        Divider(height: 1, color: AppColors.dividerColor),
                       ],
                     ),
                   ),
-                  const SliverFillRemaining(
-                    child: ExploreListWidget(),
-                  ),
+                  const SliverFillRemaining(child: ExploreListWidget()),
                 ],
               ],
             ),
@@ -173,8 +172,10 @@ class _NoInternetWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.themeColor,
                 foregroundColor: const Color.fromARGB(255, 255, 255, 255),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),

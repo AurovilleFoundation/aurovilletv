@@ -116,7 +116,6 @@ class AppUtils {
     }
   }
 
-  void _handleError(String msg) {}
 
   String getDateString(DateTime date) {
     final DateFormat dateFormat = DateFormat('MMM dd, yyyy');

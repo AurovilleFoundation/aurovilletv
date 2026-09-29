@@ -9,8 +9,9 @@ abstract class VideoDetailsEvent extends Equatable {
 
 class LoadVideoDetails extends VideoDetailsEvent {
   final String videoId;
-  const LoadVideoDetails(this.videoId);
+  final dynamic initialVideo;
+  const LoadVideoDetails(this.videoId, {this.initialVideo});
 
   @override
-  List<Object?> get props => [videoId];
+  List<Object?> get props => [videoId, initialVideo];
 }

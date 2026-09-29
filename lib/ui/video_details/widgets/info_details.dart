@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
+import 'package:aurovilletv/utils/theme/colors.dart';
 
 class InfoDetails extends StatelessWidget {
   final VideoModel video;
@@ -20,13 +21,17 @@ class InfoDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String formattedDate = _formatDateTime(video.publishDate ?? video.uploadDate);
+    final String formattedDate = _formatDateTime(
+      video.publishDate ?? video.uploadDate,
+    );
     final String programmeTag = (video.category?.isNotEmpty == true)
         ? video.category!.toUpperCase()
         : "PROGRAMME";
 
-    final bool isEnded = !video.isLive &&
-        (video.publishDate != null && video.publishDate!.isBefore(DateTime.now()));
+    final bool isEnded =
+        !video.isLive &&
+        (video.publishDate != null &&
+            video.publishDate!.isBefore(DateTime.now()));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +41,7 @@ class InfoDetails extends StatelessWidget {
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: Color(0xFFC85A17),
+            color: AppColors.themeColor,
             letterSpacing: 1.1,
           ),
         ),
@@ -78,8 +83,8 @@ class InfoDetails extends StatelessWidget {
             video.isLive
                 ? "Streaming now on Auroville TV network."
                 : (isEnded
-                    ? "The programme ended at ${_formatEndTime(video.publishDate, video.durationMinutes)}."
-                    : "The programme will start at $formattedDate."),
+                      ? "The programme ended at ${_formatEndTime(video.publishDate, video.durationMinutes)}."
+                      : "The programme will start at $formattedDate."),
             style: const TextStyle(
               fontSize: 12,
               color: Color(0xFF5A3B28),
