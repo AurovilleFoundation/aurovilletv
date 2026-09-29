@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:aurovilletv/utils/theme/colors.dart';
 import '../bloc/explore_bloc.dart';
 
 class CategoryTabWidget extends StatelessWidget {
@@ -14,46 +13,48 @@ class CategoryTabWidget extends StatelessWidget {
       buildWhen: (previous, current) =>
           previous.selectedCategory != current.selectedCategory,
       builder: (context, state) {
-        return Container(
+        return SizedBox(
           height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: _tabs.map((label) {
               final isSelected = state.selectedCategory == label;
 
               return Expanded(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(24),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () {
                     if (!isSelected) {
-                      context.read<ExploreBloc>().add(FilterByCategory(label));
+                      context.read<ExploreBloc>().add(
+                            FilterByCategory(label),
+                          );
                     }
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Spacer(),
+                      // Instant Text (No animation delay)
                       Text(
                         label,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w500,
                           color: isSelected
-                              ? AppColors.themeColor
-                              : AppColors.darkColor,
+                              ? const Color(0xFFC85A17)
+                              : Colors.black,
                         ),
                       ),
                       const Spacer(),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
+
+                      // Instant Underline (0ms delay)
+                      Container(
                         height: 2.5,
                         width: isSelected ? 36 : 0,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.themeColor
+                              ? const Color(0xFFC85A17)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(2),
                         ),

@@ -10,7 +10,7 @@ class DBManager {
   static Database? _database;
 
   static const String _databaseName = 'auroville_tv.db';
-  static const int _databaseVersion = 5; // Bumped version to allow TEXT category id
+  static const int _databaseVersion = 5;
   static const String watchListTable = 'watchlist';
   static const String categoriesTable = 'categories';
 
@@ -23,6 +23,7 @@ class DBManager {
   Future<Database> _initDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, _databaseName);
+
     return openDatabase(
       path,
       version: _databaseVersion,
@@ -54,6 +55,7 @@ class DBManager {
     ''');
 
     // ---------------- Categories Table Creation ----------------
+    // Using TEXT for id to support both String and Integer identifiers safely
     await db.execute('''
       CREATE TABLE $categoriesTable (
         id TEXT PRIMARY KEY,
@@ -62,8 +64,12 @@ class DBManager {
     ''');
   }
 
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Drop old table to clean up constraint mismatches
+  Future<void> _onUpgrade(
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
+    // Drop old tables and recreate schema to resolve constraint or type mismatches
     await db.execute('DROP TABLE IF EXISTS $watchListTable');
     await db.execute('DROP TABLE IF EXISTS $categoriesTable');
     await _onCreate(db, newVersion);
@@ -75,10 +81,12 @@ class DBManager {
 
   Future<List<VideoModel>> getWatchList() async {
     final db = await database;
+
     final result = await db.query(
       watchListTable,
       orderBy: 'COALESCE(watched_at, publish_date) DESC',
     );
+
     // Convert raw database rows into Map<String, dynamic> safely before mapping
     return result
         .map((row) => VideoModel.fromMap(Map<String, dynamic>.from(row)))
@@ -88,7 +96,7 @@ class DBManager {
   /// Alias for getWatchList
   Future<List<VideoModel>> getVideos() async => getWatchList();
 
-  /// Inserts video with timestamp safely
+  /// Inserts a video with a timestamp safely
   Future<void> addVideo(VideoModel video) async {
     final db = await database;
     final map = Map<String, dynamic>.from(video.toMap());
@@ -111,6 +119,7 @@ class DBManager {
 
   Future<void> removeVideo(String id) async {
     final db = await database;
+
     await db.delete(
       watchListTable,
       where: 'id = ?',
@@ -124,12 +133,14 @@ class DBManager {
 
   Future<bool> isInWatchList(String id) async {
     final db = await database;
+
     final result = await db.query(
       watchListTable,
       where: 'id = ?',
       whereArgs: [id],
       limit: 1,
     );
+
     return result.isNotEmpty;
   }
 
@@ -148,15 +159,23 @@ class DBManager {
 
   Future<List<CategoryModel>> getCategories() async {
     final db = await database;
-    final result = await db.query(categoriesTable, orderBy: 'name ASC');
+
+    final result = await db.query(
+      categoriesTable,
+      orderBy: 'name ASC',
+    );
+
     return result
         .map((e) => CategoryModel.fromMap(Map<String, dynamic>.from(e)))
         .toList();
   }
 
-  Future<void> insertCategories(List<CategoryModel> categories) async {
+  Future<void> insertCategories(
+    List<CategoryModel> categories,
+  ) async {
     final db = await database;
     final batch = db.batch();
+
     for (final category in categories) {
       batch.insert(
         categoriesTable,
@@ -164,6 +183,7 @@ class DBManager {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
+
     await batch.commit(noResult: true);
   }
 
@@ -172,11 +192,16 @@ class DBManager {
     await db.delete(categoriesTable);
   }
 
-  Future<void> replaceCategories(List<CategoryModel> categories) async {
+  Future<void> replaceCategories(
+    List<CategoryModel> categories,
+  ) async {
     final db = await database;
+
     await db.transaction((txn) async {
       await txn.delete(categoriesTable);
+
       final batch = txn.batch();
+
       for (final category in categories) {
         batch.insert(
           categoriesTable,
@@ -184,6 +209,7 @@ class DBManager {
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }
+
       await batch.commit(noResult: true);
     });
   }

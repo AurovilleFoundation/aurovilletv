@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
+import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import '../bloc/explore_bloc.dart';
-import '../../live/live_detail_screen.dart';
-import '../../video_details/video_details_screen.dart';
 
 class ExploreListWidget extends StatelessWidget {
   const ExploreListWidget({super.key});
@@ -14,17 +13,15 @@ class ExploreListWidget extends StatelessWidget {
   Widget _buildThumbnail(String thumbnail) {
     final String imageUrl = thumbnail.trim();
 
-    // 1. If empty or points to an asset, load local thumb.png
     if (imageUrl.isEmpty || imageUrl.startsWith('assets/')) {
       return _buildLocalThumb();
     }
 
-    // 2. If valid full HTTP/HTTPS URL, load network image with fallback
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return Image.network(
         imageUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _buildLocalThumb(),
+        errorBuilder: (context, error, stackTrace) => _buildLocalThumb(),
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return _buildLocalThumb();
@@ -32,7 +29,6 @@ class ExploreListWidget extends StatelessWidget {
       );
     }
 
-    // 3. Fallback for all other cases
     return _buildLocalThumb();
   }
 
@@ -40,12 +36,12 @@ class ExploreListWidget extends StatelessWidget {
     return Image.asset(
       _defaultAssetThumb,
       fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => Container(
-        color: AppColors.beigeColor,
+      errorBuilder: (context, error, stackTrace) => Container(
+        color: const Color(0xFFEADBCE),
         child: const Center(
           child: Icon(
             Icons.movie_creation_outlined,
-            color: AppColors.themeColor,
+            color: Color(0xFFC85A17),
             size: 36,
           ),
         ),
@@ -53,23 +49,13 @@ class ExploreListWidget extends StatelessWidget {
     );
   }
 
-  void _navigateToVideo(BuildContext context, VideoModel video) {
-    if (video.isLive) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              LiveDetailScreen(liveStream: video.toLiveStreamModel()),
-        ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => VideoDetailsScreen(videoId: video.id, video: video),
-        ),
-      );
-    }
+  void _navigateToDetails(BuildContext context, String videoId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VideoDetailsScreen(videoId: videoId),
+      ),
+    );
   }
 
   @override
@@ -78,12 +64,12 @@ class ExploreListWidget extends StatelessWidget {
       buildWhen: (previous, current) =>
           previous.isLoading != current.isLoading ||
           previous.videos != current.videos ||
+          previous.selectedCategory != current.selectedCategory ||
           previous.errorMessage != current.errorMessage,
       builder: (context, state) {
-        if (state.isLoading && state.videos.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.themeColor),
-          );
+        // Slow Network அல்லது Refresh ஆகும் போது தோன்றும் Circular Progress + Grey Shimmer UI
+        if (state.isLoading) {
+          return const _ExploreLoadingSkeleton();
         }
 
         if (state.errorMessage != null && state.videos.isEmpty) {
@@ -91,32 +77,30 @@ class ExploreListWidget extends StatelessWidget {
         }
 
         if (state.videos.isEmpty) {
-          return const _EmptyWidget();
+          return _EmptyWidget(category: state.selectedCategory);
         }
 
-        return RefreshIndicator(
-          color: AppColors.themeColor,
-          onRefresh: () async {
-            context.read<ExploreBloc>().add(const RefreshExplore());
-          },
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            itemCount: state.videos.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 20),
-            itemBuilder: (context, index) {
-              final video = state.videos[index];
+        return ListView.separated(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          itemCount: state.videos.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 20),
+          itemBuilder: (context, index) {
+            final video = state.videos[index];
 
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () => _navigateToVideo(context, video),
+            return Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () => _navigateToDetails(context, video.id),
+                child: SizedBox(
+                  height: 125,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Video Thumbnail Box
                       SizedBox(
-                        width: 175,
+                        width: 200,
                         height: 125,
                         child: Stack(
                           children: [
@@ -175,9 +159,7 @@ class ExploreListWidget extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(6),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.2,
-                                        ),
+                                        color: Colors.black.withValues(alpha: 0.2),
                                         blurRadius: 4,
                                         offset: const Offset(0, 1),
                                       ),
@@ -210,7 +192,7 @@ class ExploreListWidget extends StatelessWidget {
 
                       const SizedBox(width: 14),
 
-                      // Title & Subtitle Area (Starting at top of video)
+                      // Title & Subtitle Area
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.only(top: 4.0),
@@ -225,7 +207,7 @@ class ExploreListWidget extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.darkColor,
+                                  color: Color(0xFF1E1E1E),
                                   height: 1.25,
                                   letterSpacing: -0.2,
                                 ),
@@ -239,28 +221,139 @@ class ExploreListWidget extends StatelessWidget {
 
                       const SizedBox(width: 8),
 
-                      // Navigation Arrow (Middle-Aligned, Size 16)
-                      SizedBox(
-                        height: 125,
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(right: 8.0),
-                            child: Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 16,
-                              color: Colors.grey.shade400,
-                            ),
+                      // Navigation Arrow (Vertically Centered & 8px Inset from Edge)
+                      const Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: Color(0xFFBDBDBD),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         );
       },
+    );
+  }
+}
+
+// ---------------- Grey Skeleton Loader with Top Circle ----------------
+class _ExploreLoadingSkeleton extends StatelessWidget {
+  const _ExploreLoadingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Top Center Progress Indicator
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 14.0),
+          child: SizedBox(
+            height: 26,
+            width: 26,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.8,
+              color: Color(0xFFC85A17),
+            ),
+          ),
+        ),
+
+        // Grey Video Cards Skeleton
+        Expanded(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              itemCount: 5,
+              separatorBuilder: (context, index) => const SizedBox(height: 20),
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  height: 125,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Grey Thumbnail Box Skeleton
+                      Container(
+                        width: 200,
+                        height: 125,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      // Grey Texts Skeleton
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 16,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                height: 16,
+                                width: 110,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Container(
+                                height: 12,
+                                width: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // Grey Arrow Skeleton
+                      const Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -271,8 +364,7 @@ class _VideoMetaSubtitle extends StatelessWidget {
   const _VideoMetaSubtitle({required this.video});
 
   String _getDuration() {
-    if (video.formattedDuration != null &&
-        video.formattedDuration!.isNotEmpty) {
+    if (video.formattedDuration != null && video.formattedDuration!.isNotEmpty) {
       return video.formattedDuration!;
     }
     if (video.durationMinutes != null && video.durationMinutes! > 0) {
@@ -284,15 +376,12 @@ class _VideoMetaSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String category =
-        (video.category != null && video.category!.isNotEmpty)
+    final String category = (video.category != null && video.category!.isNotEmpty)
         ? video.category!
         : "Documentary";
 
     final String duration = _getDuration();
-    final String subtitle = duration.isNotEmpty
-        ? "$category  •  $duration"
-        : category;
+    final String subtitle = duration.isNotEmpty ? "$category  •  $duration" : category;
 
     return Text(
       subtitle,
@@ -308,14 +397,16 @@ class _VideoMetaSubtitle extends StatelessWidget {
 }
 
 class _EmptyWidget extends StatelessWidget {
-  const _EmptyWidget();
+  final String category;
+
+  const _EmptyWidget({this.category = "All"});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
-        "No Videos Found",
-        style: TextStyle(
+        "No $category Videos Found",
+        style: const TextStyle(
           color: Colors.grey,
           fontSize: 15,
           fontWeight: FontWeight.w500,
@@ -353,8 +444,8 @@ class _ErrorWidget extends StatelessWidget {
             const SizedBox(height: 16),
             OutlinedButton(
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.themeColor,
-                side: const BorderSide(color: AppColors.themeColor),
+                foregroundColor: const Color(0xFFC85A17),
+                side: const BorderSide(color: Color(0xFFC85A17)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
