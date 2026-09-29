@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:aurovilletv/utils/theme/colors.dart';
 import '../bloc/explore_bloc.dart';
 
 class CategoryTabWidget extends StatelessWidget {
@@ -25,9 +26,7 @@ class CategoryTabWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   onTap: () {
                     if (!isSelected) {
-                      context.read<ExploreBloc>().add(
-                            FilterByCategory(label),
-                          );
+                      context.read<ExploreBloc>().add(FilterByCategory(label));
                     }
                   },
                   child: Column(
@@ -39,11 +38,12 @@ class CategoryTabWidget extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                           color: isSelected
-                              ? const Color(0xFFC85A17)
-                              : const Color.fromARGB(255, 0, 0, 0),
+                              ? AppColors.themeColor
+                              : AppColors.darkColor,
                         ),
                       ),
                       const Spacer(),
@@ -53,7 +53,7 @@ class CategoryTabWidget extends StatelessWidget {
                         width: isSelected ? 36 : 0,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFFC85A17)
+                              ? AppColors.themeColor
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(2),
                         ),

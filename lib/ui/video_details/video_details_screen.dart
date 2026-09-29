@@ -8,18 +8,18 @@ import 'bloc/video_details_state.dart';
 import 'widgets/head_section.dart';
 import 'widgets/info_image.dart';
 import 'widgets/info_details.dart';
+import 'package:aurovilletv/utils/theme/colors.dart';
 import 'widgets/details_text.dart';
 
 class VideoDetailsScreen extends StatelessWidget {
   final String? videoId;
   final VideoModel? video;
 
-  const VideoDetailsScreen({
-    super.key,
-    this.videoId,
-    this.video,
-  }) : assert(videoId != null || video != null,
-            'Either videoId or video must be provided');
+  const VideoDetailsScreen({super.key, this.videoId, this.video})
+    : assert(
+        videoId != null || video != null,
+        'Either videoId or video must be provided',
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -27,31 +27,33 @@ class VideoDetailsScreen extends StatelessWidget {
     final apiService = context.read<VideoApiService>();
 
     return BlocProvider(
-      create: (_) => VideoDetailsBloc(apiService: apiService)
-        ..add(LoadVideoDetails(effectiveVideoId, initialVideo: video)),
+      create: (_) =>
+          VideoDetailsBloc(apiService: apiService)
+            ..add(LoadVideoDetails(effectiveVideoId, initialVideo: video)),
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 245, 233, 221),
+        backgroundColor: AppColors.scaffoldBackgroundColor,
         body: BlocBuilder<VideoDetailsBloc, VideoDetailsState>(
           builder: (context, state) {
             if (state is VideoDetailsLoading) {
               return Scaffold(
-                backgroundColor: const Color.fromARGB(255, 245, 233, 221),
+                backgroundColor: AppColors.scaffoldBackgroundColor,
                 appBar: AppBar(
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   leading: IconButton(
                     icon: const CircleAvatar(
                       backgroundColor: Colors.black45,
-                      child: Icon(Icons.arrow_back,
-                          color: Colors.white, size: 22),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
                 body: const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFFC85A17),
-                  ),
+                  child: CircularProgressIndicator(color: AppColors.themeColor),
                 ),
               );
             } else if (state is VideoDetailsLoaded) {
@@ -63,13 +65,12 @@ class VideoDetailsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      HeadSection(
-                        video: currentVideo,
-                        bannerHeight: 380,
-                      ),
+                      HeadSection(video: currentVideo, bannerHeight: 380),
                       Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 24),
+                          horizontal: 20,
+                          vertical: 24,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -92,7 +93,8 @@ class VideoDetailsScreen extends StatelessWidget {
                                   InfoImage(video: currentVideo),
                                   const SizedBox(width: 16),
                                   Expanded(
-                                      child: InfoDetails(video: currentVideo)),
+                                    child: InfoDetails(video: currentVideo),
+                                  ),
                                 ],
                               ),
                             ),
@@ -108,15 +110,18 @@ class VideoDetailsScreen extends StatelessWidget {
               );
             } else if (state is VideoDetailsError) {
               return Scaffold(
-                backgroundColor: const Color.fromARGB(255, 245, 233, 221),
+                backgroundColor: AppColors.scaffoldBackgroundColor,
                 appBar: AppBar(
                   backgroundColor: Colors.transparent,
                   elevation: 0,
                   leading: IconButton(
                     icon: const CircleAvatar(
                       backgroundColor: Colors.black45,
-                      child: Icon(Icons.arrow_back,
-                          color: Colors.white, size: 22),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 22,
+                      ),
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -127,26 +132,33 @@ class VideoDetailsScreen extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.error_outline,
-                            color: Colors.red, size: 48),
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 48,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           state.message,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              color: Colors.red, fontSize: 14),
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFC85A17),
+                            backgroundColor: AppColors.themeColor,
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () {
                             context.read<VideoDetailsBloc>().add(
-                                  LoadVideoDetails(effectiveVideoId,
-                                      initialVideo: video),
-                                );
+                              LoadVideoDetails(
+                                effectiveVideoId,
+                                initialVideo: video,
+                              ),
+                            );
                           },
                           child: const Text("Retry"),
                         ),

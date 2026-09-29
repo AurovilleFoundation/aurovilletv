@@ -6,16 +6,13 @@ import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/ui/watchlist/bloc/watchlist_bloc.dart';
+import 'package:aurovilletv/utils/theme/colors.dart';
 
 class HeadSection extends StatefulWidget {
   final VideoModel video;
   final double bannerHeight;
 
-  const HeadSection({
-    super.key,
-    required this.video,
-    this.bannerHeight = 360,
-  });
+  const HeadSection({super.key, required this.video, this.bannerHeight = 360});
 
   @override
   State<HeadSection> createState() => _HeadSectionState();
@@ -211,9 +208,11 @@ class _HeadSectionState extends State<HeadSection> {
   @override
   Widget build(BuildContext context) {
     final video = widget.video;
-    final String formattedDate =
-        _formatDateTime(video.publishDate ?? video.uploadDate);
-    final bool isEnded = !video.isLive &&
+    final String formattedDate = _formatDateTime(
+      video.publishDate ?? video.uploadDate,
+    );
+    final bool isEnded =
+        !video.isLive &&
         (video.publishDate != null &&
             video.publishDate!.isBefore(DateTime.now()));
 
@@ -251,10 +250,7 @@ class _HeadSectionState extends State<HeadSection> {
                       fit: BoxFit.cover,
                     ),
                   )
-                : Image.asset(
-                    'assets/images/thumb.png',
-                    fit: BoxFit.cover,
-                  ),
+                : Image.asset('assets/images/thumb.png', fit: BoxFit.cover),
 
             // Dark Gradient Overlay
             Container(
@@ -277,7 +273,10 @@ class _HeadSectionState extends State<HeadSection> {
           if (!_isPlaying)
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
@@ -286,7 +285,9 @@ class _HeadSectionState extends State<HeadSection> {
                     // Status Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.55),
                         borderRadius: BorderRadius.circular(24),
@@ -300,16 +301,16 @@ class _HeadSectionState extends State<HeadSection> {
                             backgroundColor: video.isLive
                                 ? const Color(0xFFE53935)
                                 : (isEnded
-                                    ? const Color(0xFFEF5350)
-                                    : const Color(0xFFFB8C00)),
+                                      ? const Color(0xFFEF5350)
+                                      : const Color(0xFFFB8C00)),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             video.isLive
                                 ? "LIVE NOW"
                                 : (isEnded
-                                    ? "PROGRAMME ENDED"
-                                    : "UPCOMING PROGRAMME"),
+                                      ? "PROGRAMME ENDED"
+                                      : "UPCOMING PROGRAMME"),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -359,7 +360,7 @@ class _HeadSectionState extends State<HeadSection> {
                         width: 44,
                         height: 44,
                         child: CircularProgressIndicator(
-                          color: Color(0xFFC85A17),
+                          color: AppColors.themeColor,
                           strokeWidth: 3,
                         ),
                       )
@@ -374,14 +375,17 @@ class _HeadSectionState extends State<HeadSection> {
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFC85A17),
+                            color: AppColors.themeColor,
                             borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFC85A17)
-                                    .withValues(alpha: 0.4),
+                                color: AppColors.themeColor.withValues(
+                                  alpha: 0.4,
+                                ),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -415,7 +419,10 @@ class _HeadSectionState extends State<HeadSection> {
             ),
 
           // Video Controls Overlay (when actively playing)
-          if (_isInitialized && _controller != null && _isPlaying && _showControls)
+          if (_isInitialized &&
+              _controller != null &&
+              _isPlaying &&
+              _showControls)
             Positioned.fill(
               child: GestureDetector(
                 onTap: _toggleControls,
@@ -444,7 +451,9 @@ class _HeadSectionState extends State<HeadSection> {
                         right: 0,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.bottomCenter,
@@ -458,10 +467,11 @@ class _HeadSectionState extends State<HeadSection> {
                               VideoProgressIndicator(
                                 _controller!,
                                 allowScrubbing: true,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
                                 colors: const VideoProgressColors(
-                                  playedColor: Color(0xFFC85A17),
+                                  playedColor: AppColors.themeColor,
                                   bufferedColor: Colors.white30,
                                   backgroundColor: Colors.white10,
                                 ),
@@ -531,8 +541,11 @@ class _HeadSectionState extends State<HeadSection> {
                     backgroundColor: Colors.black54,
                     radius: 20,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: Colors.white, size: 20),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -540,7 +553,8 @@ class _HeadSectionState extends State<HeadSection> {
                   // Bookmark Button with custom pill-style SnackBar
                   BlocBuilder<WatchListBloc, WatchListState>(
                     builder: (context, state) {
-                      final bool isBookmarked = state is WatchListLoaded &&
+                      final bool isBookmarked =
+                          state is WatchListLoaded &&
                           state.videos.any((item) => item.id == video.id);
 
                       return CircleAvatar(
@@ -568,18 +582,23 @@ class _HeadSectionState extends State<HeadSection> {
                                   backgroundColor: Colors.transparent,
                                   behavior: SnackBarBehavior.floating,
                                   margin: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 16),
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
                                   duration: const Duration(seconds: 1),
                                   content: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 12),
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF1E1E1E),
                                       borderRadius: BorderRadius.circular(30),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black
-                                              .withValues(alpha: 0.25),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.25,
+                                          ),
                                           blurRadius: 10,
                                           offset: const Offset(0, 4),
                                         ),
@@ -592,8 +611,9 @@ class _HeadSectionState extends State<HeadSection> {
                                           width: 26,
                                           height: 26,
                                           decoration: BoxDecoration(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.20),
+                                            color: Colors.white.withValues(
+                                              alpha: 0.20,
+                                            ),
                                             shape: BoxShape.circle,
                                           ),
                                           child: const Icon(
@@ -626,18 +646,23 @@ class _HeadSectionState extends State<HeadSection> {
                                   backgroundColor: Colors.transparent,
                                   behavior: SnackBarBehavior.floating,
                                   margin: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 16),
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
                                   duration: const Duration(seconds: 1),
                                   content: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 12),
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFC85A17),
+                                      color: AppColors.themeColor,
                                       borderRadius: BorderRadius.circular(30),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black
-                                              .withValues(alpha: 0.25),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.25,
+                                          ),
                                           blurRadius: 10,
                                           offset: const Offset(0, 4),
                                         ),
@@ -650,8 +675,9 @@ class _HeadSectionState extends State<HeadSection> {
                                           width: 26,
                                           height: 26,
                                           decoration: BoxDecoration(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.20),
+                                            color: Colors.white.withValues(
+                                              alpha: 0.20,
+                                            ),
                                             shape: BoxShape.circle,
                                           ),
                                           child: const Icon(
@@ -696,10 +722,7 @@ class _FullScreenVideoPlayer extends StatefulWidget {
   final VideoPlayerController controller;
   final String title;
 
-  const _FullScreenVideoPlayer({
-    required this.controller,
-    required this.title,
-  });
+  const _FullScreenVideoPlayer({required this.controller, required this.title});
 
   @override
   State<_FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();
@@ -848,7 +871,7 @@ class _FullScreenVideoPlayerState extends State<_FullScreenVideoPlayer> {
                       widget.controller,
                       allowScrubbing: true,
                       colors: const VideoProgressColors(
-                        playedColor: Color(0xFFC85A17),
+                        playedColor: AppColors.themeColor,
                         bufferedColor: Colors.white30,
                         backgroundColor: Colors.white10,
                       ),

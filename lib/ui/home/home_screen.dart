@@ -1,7 +1,7 @@
 import 'package:aurovilletv/data/models/category_model.dart';
 import 'package:aurovilletv/data/models/home_data_model.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
-import 'package:aurovilletv/ui/explore/bloc/explore_bloc.dart';
+import 'package:aurovilletv/ui/category/category_videos_screen.dart';
 import 'package:aurovilletv/ui/home/cubit/home_cubit.dart';
 import 'package:aurovilletv/ui/main/bloc/navigation_bloc.dart';
 import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
@@ -55,16 +55,37 @@ class _HomeLoadingWidget extends StatelessWidget {
             // Header shimmer
             Row(
               children: [
-                Container(width: 40, height: 40, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
                 const SizedBox(width: 12),
                 Container(width: 150, height: 24, color: Colors.white),
                 const Spacer(),
-                Container(width: 40, height: 40, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24),
             // Banner shimmer
-            Container(width: double.infinity, height: 220, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            Container(
+              width: double.infinity,
+              height: 220,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
             const SizedBox(height: 24),
             // Section title shimmer
             Container(width: 100, height: 18, color: Colors.white),
@@ -76,7 +97,14 @@ class _HomeLoadingWidget extends StatelessWidget {
                 4,
                 (index) => Column(
                   children: [
-                    Container(width: 60, height: 60, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Container(width: 50, height: 12, color: Colors.white),
                   ],
@@ -89,9 +117,23 @@ class _HomeLoadingWidget extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Container(width: 250, height: 140, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                Container(
+                  width: 250,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Container(width: 100, height: 140, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                Container(
+                  width: 100,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ],
             ),
           ],
@@ -117,11 +159,19 @@ class _HomeErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.cloud_off_rounded, size: 72, color: Colors.redAccent),
+            const Icon(
+              Icons.cloud_off_rounded,
+              size: 72,
+              color: Colors.redAccent,
+            ),
             const SizedBox(height: 16),
             const Text(
               "Oops, could not load Home Screen",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.earthColor),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.earthColor,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
@@ -242,7 +292,12 @@ class _HomeLoadedWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
             "EXPLORE",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.earthColor, letterSpacing: 0.5),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkColor,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -267,9 +322,12 @@ class _HomeLoadedWidget extends StatelessWidget {
   Widget _buildCategoryItem(BuildContext context, CategoryModel category) {
     return GestureDetector(
       onTap: () {
-        // Dispatch to Explore Bloc and select this category tab
-        context.read<ExploreBloc>().add(CategoryChanged(category.id));
-        context.read<NavigationBloc>().add(const TabChanged(2)); // index 2 is Explore tab
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryVideosScreen(category: category),
+          ),
+        );
       },
       child: Column(
         children: [
@@ -343,7 +401,12 @@ class _HomeLoadedWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
             "FEATURED",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.earthColor, letterSpacing: 0.5),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkColor,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -371,9 +434,7 @@ class _HomeLoadedWidget extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => VideoDetailsScreen(video: video),
-          ),
+          MaterialPageRoute(builder: (_) => VideoDetailsScreen(video: video)),
         );
       },
       child: Container(
@@ -410,7 +471,11 @@ class _HomeLoadedWidget extends StatelessWidget {
                     video.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.darkColor),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: AppColors.darkColor,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -438,7 +503,12 @@ class _HomeLoadedWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
             "POPULAR VIDEOS",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.earthColor, letterSpacing: 0.5),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkColor,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -466,9 +536,7 @@ class _HomeLoadedWidget extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => VideoDetailsScreen(video: video),
-          ),
+          MaterialPageRoute(builder: (_) => VideoDetailsScreen(video: video)),
         );
       },
       child: Container(
@@ -503,7 +571,11 @@ class _HomeLoadedWidget extends StatelessWidget {
                     video.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.darkColor),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: AppColors.darkColor,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -544,7 +616,12 @@ class _HomeLoadedWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
             "LATEST VIDEOS",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.earthColor, letterSpacing: 0.5),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.darkColor,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -570,9 +647,7 @@ class _HomeLoadedWidget extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => VideoDetailsScreen(video: video),
-          ),
+          MaterialPageRoute(builder: (_) => VideoDetailsScreen(video: video)),
         );
       },
       child: Container(
@@ -608,26 +683,43 @@ class _HomeLoadedWidget extends StatelessWidget {
                     video.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.darkColor, height: 1.2),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: AppColors.darkColor,
+                      height: 1.2,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.themeColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          video.categoryId.isNotEmpty ? video.categoryId : 'General',
-                          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.themeColor),
+                          video.categoryId.isNotEmpty
+                              ? video.categoryId
+                              : 'General',
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.themeColor,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         "${video.viewCount} views",
-                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -690,10 +782,10 @@ class _HomeLoadedWidget extends StatelessWidget {
                     alignment: Alignment.center,
                     errorBuilder: (context, error, stackTrace) =>
                         const VideoPlaceholderWidget(
-                      imageUrl: '',
-                      borderRadius: 0,
-                      showPlayIcon: false,
-                    ),
+                          imageUrl: '',
+                          borderRadius: 0,
+                          showPlayIcon: false,
+                        ),
                   ),
                 // Gradient overlay
                 Container(
@@ -718,7 +810,10 @@ class _HomeLoadedWidget extends StatelessWidget {
                     children: [
                       if (liveVideo.categoryId.isNotEmpty)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
                             color: AppColors.themeColor,

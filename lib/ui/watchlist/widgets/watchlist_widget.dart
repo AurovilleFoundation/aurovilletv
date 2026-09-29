@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/ui/live/live_detail_screen.dart';
@@ -37,11 +38,11 @@ class WatchListWidget extends StatelessWidget {
       _defaultAssetThumb,
       fit: BoxFit.cover,
       errorBuilder: (_, _, _) => Container(
-        color: const Color(0xFFEADBCE),
+        color: AppColors.beigeColor,
         child: const Center(
           child: Icon(
             Icons.movie_creation_outlined,
-            color: Color(0xFFC85A17),
+            color: AppColors.themeColor,
             size: 36,
           ),
         ),
@@ -55,9 +56,7 @@ class WatchListWidget extends StatelessWidget {
       builder: (context, state) {
         if (state is WatchListLoading) {
           return const Center(
-            child: CircularProgressIndicator(
-              color: Color(0xFFC85A17),
-            ),
+            child: CircularProgressIndicator(color: AppColors.themeColor),
           );
         }
 
@@ -76,7 +75,7 @@ class WatchListWidget extends StatelessWidget {
           }
 
           return RefreshIndicator(
-            color: const Color(0xFFC85A17),
+            color: AppColors.themeColor,
             onRefresh: () async {
               context.read<WatchListBloc>().add(const RefreshWatchList());
             },
@@ -102,10 +101,8 @@ class WatchListWidget extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => VideoDetailsScreen(
-                          videoId: video.id,
-                          video: video,
-                        ),
+                        builder: (_) =>
+                            VideoDetailsScreen(videoId: video.id, video: video),
                       ),
                     );
                   }
@@ -145,24 +142,24 @@ class WatchListWidget extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       onTap: navigateToVideo,
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Video Thumbnail Container
                           SizedBox(
-                            width: 165,
-                            height: 115,
+                            width: 175,
+                            height: 125,
                             child: Stack(
                               children: [
                                 Positioned.fill(
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(18),
+                                    borderRadius: BorderRadius.circular(20),
                                     child: _buildThumbnail(video.thumbnail),
                                   ),
                                 ),
                                 Positioned.fill(
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(18),
+                                      borderRadius: BorderRadius.circular(20),
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
@@ -176,19 +173,19 @@ class WatchListWidget extends StatelessWidget {
                                 ),
                                 // Play Icon (Bottom Left)
                                 const Positioned(
-                                  left: 8,
-                                  bottom: 8,
+                                  left: 10,
+                                  bottom: 10,
                                   child: DecoratedBox(
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       shape: BoxShape.circle,
                                     ),
                                     child: Padding(
-                                      padding: EdgeInsets.all(5.0),
+                                      padding: EdgeInsets.all(6.0),
                                       child: Icon(
                                         Icons.play_arrow_rounded,
                                         color: Colors.black87,
-                                        size: 18,
+                                        size: 20,
                                       ),
                                     ),
                                   ),
@@ -196,19 +193,21 @@ class WatchListWidget extends StatelessWidget {
                                 // Live Tag (Top Right)
                                 if (video.isLive)
                                   Positioned(
-                                    top: 8,
-                                    right: 8,
+                                    top: 10,
+                                    right: 10,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
+                                        horizontal: 7,
+                                        vertical: 3,
                                       ),
                                       decoration: BoxDecoration(
                                         color: const Color(0xFFE53935),
                                         borderRadius: BorderRadius.circular(6),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.2),
+                                            color: Colors.black.withValues(
+                                              alpha: 0.2,
+                                            ),
                                             blurRadius: 4,
                                             offset: const Offset(0, 1),
                                           ),
@@ -241,39 +240,47 @@ class WatchListWidget extends StatelessWidget {
 
                           const SizedBox(width: 14),
 
-                          // Video Info Area (Vertically Centered)
+                          // Video Info Area (Starting at top of video)
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  video.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF1E1E1E),
-                                    height: 1.25,
-                                    letterSpacing: -0.2,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    video.title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF1E1E1E),
+                                      height: 1.25,
+                                      letterSpacing: -0.2,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                _VideoMetaSubtitle(video: video),
-                              ],
+                                  const SizedBox(height: 6),
+                                  _VideoMetaSubtitle(video: video),
+                                ],
+                              ),
                             ),
                           ),
 
                           const SizedBox(width: 8),
 
-                          // Navigation Arrow (Vertically Centered)
-                          const Padding(
-                            padding: EdgeInsets.only(right: 6.0),
-                            child: Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 16,
-                              color: Color(0xFF9E9E9E),
+                          // Navigation Arrow (Middle-Aligned, Size 16)
+                          const SizedBox(
+                            height: 125,
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.only(right: 8.0),
+                                child: Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  size: 16,
+                                  color: Color(0xFFBDBDBD),
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -298,7 +305,8 @@ class _VideoMetaSubtitle extends StatelessWidget {
   const _VideoMetaSubtitle({required this.video});
 
   String _getDuration() {
-    if (video.formattedDuration != null && video.formattedDuration!.isNotEmpty) {
+    if (video.formattedDuration != null &&
+        video.formattedDuration!.isNotEmpty) {
       return video.formattedDuration!;
     }
     if (video.durationMinutes != null && video.durationMinutes! > 0) {
@@ -344,13 +352,13 @@ class _EmptyWatchList extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: const Color(0xFFC85A17).withValues(alpha: 0.08),
+                color: AppColors.themeColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.bookmark_border_rounded,
                 size: 54,
-                color: Color(0xFFC85A17),
+                color: AppColors.themeColor,
               ),
             ),
             const SizedBox(height: 18),

@@ -1,7 +1,6 @@
 import 'package:aurovilletv/data/models/live_stream_model.dart';
 import 'package:aurovilletv/ui/live/cubit/live_cubit.dart';
 import 'package:aurovilletv/ui/live/live_detail_screen.dart';
-import 'package:aurovilletv/ui/main/bloc/navigation_bloc.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,15 +49,9 @@ class _LiveScreenState extends State<LiveScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.scaffoldBackgroundColor,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.darkColor),
-          tooltip: "Back to Home",
-          onPressed: () {
-            context.read<NavigationBloc>().add(const TabChanged(0));
-          },
-        ),
+        automaticallyImplyLeading: false,
         title: const Text(
           "Live Broadcast",
           style: TextStyle(
@@ -74,7 +67,7 @@ class _LiveScreenState extends State<LiveScreen>
             onPressed: () => context.read<LiveCubit>().loadLiveStatus(),
           ),
         ],
-        centerTitle: false,
+        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -88,7 +81,9 @@ class _LiveScreenState extends State<LiveScreen>
             if (state is LiveLoading || state is LiveInitial) {
               return const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.themeColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.themeColor,
+                  ),
                 ),
               );
             } else if (state is LiveNoCredentials) {
@@ -139,11 +134,7 @@ class _LiveScreenState extends State<LiveScreen>
             const Text(
               "The live stream broadcast is currently offline. Please check back later.",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.grey,
-                height: 1.4,
-              ),
+              style: TextStyle(fontSize: 15, color: Colors.grey, height: 1.4),
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
@@ -153,7 +144,10 @@ class _LiveScreenState extends State<LiveScreen>
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.themeColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -205,7 +199,10 @@ class _LiveScreenState extends State<LiveScreen>
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.themeColor,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -281,7 +278,9 @@ class _LiveScreenState extends State<LiveScreen>
                         right: 12,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF2E6DB),
                             borderRadius: BorderRadius.circular(20),
@@ -305,8 +304,9 @@ class _LiveScreenState extends State<LiveScreen>
                                       width: 20,
                                       height: 20,
                                       decoration: BoxDecoration(
-                                        color: AppColors.themeColor
-                                            .withValues(alpha: 0.32),
+                                        color: AppColors.themeColor.withValues(
+                                          alpha: 0.32,
+                                        ),
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -360,7 +360,6 @@ class _LiveScreenState extends State<LiveScreen>
                           ),
                         ),
                       ),
-
                     ],
                   ),
                 ),
@@ -405,12 +404,16 @@ class _LiveScreenState extends State<LiveScreen>
           ],
 
           // View count and Publish date
-          if (liveStream.viewerCount > 0 || liveStream.publishDate.isNotEmpty) ...[
+          if (liveStream.viewerCount > 0 ||
+              liveStream.publishDate.isNotEmpty) ...[
             Row(
               children: [
                 if (liveStream.viewerCount > 0) ...[
-                  const Icon(Icons.visibility_outlined,
-                      size: 15, color: AppColors.darkColor),
+                  const Icon(
+                    Icons.visibility_outlined,
+                    size: 15,
+                    color: AppColors.darkColor,
+                  ),
                   const SizedBox(width: 5),
                   Text(
                     "${liveStream.viewerCount} ${liveStream.viewerCount == 1 ? 'view' : 'views'}",
@@ -423,13 +426,19 @@ class _LiveScreenState extends State<LiveScreen>
                 ],
                 if (liveStream.viewerCount > 0 &&
                     liveStream.publishDate.isNotEmpty)
-                  const Text("  •  ",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkColor)),
+                  const Text(
+                    "  •  ",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkColor,
+                    ),
+                  ),
                 if (liveStream.publishDate.isNotEmpty) ...[
-                  const Icon(Icons.calendar_today_outlined,
-                      size: 14, color: AppColors.darkColor),
+                  const Icon(
+                    Icons.calendar_today_outlined,
+                    size: 14,
+                    color: AppColors.darkColor,
+                  ),
                   const SizedBox(width: 5),
                   Text(
                     liveStream.publishDate,

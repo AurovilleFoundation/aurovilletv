@@ -36,15 +36,10 @@ class _WatchlistView extends StatelessWidget {
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1.0),
-              child: Container(
-                color: const Color(0xFFE2D6CA),
-                height: 1.0,
-              ),
+              child: Container(color: AppColors.dividerColor, height: 1.0),
             ),
           ),
-          const SliverFillRemaining(
-            child: WatchListWidget(),
-          ),
+          const SliverFillRemaining(child: WatchListWidget()),
         ],
       ),
     );

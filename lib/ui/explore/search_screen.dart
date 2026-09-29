@@ -5,6 +5,7 @@ import 'package:aurovilletv/data/network/api/video_api_service.dart';
 import 'package:aurovilletv/ui/explore/cubit/search_cubit.dart';
 import 'package:aurovilletv/ui/live/live_detail_screen.dart';
 import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
+import 'package:aurovilletv/utils/theme/colors.dart';
 
 class SearchScreen extends StatelessWidget {
   final VideoApiService apiService;
@@ -17,13 +18,18 @@ class SearchScreen extends StatelessWidget {
     final cubit = context.read<SearchCubit>();
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 241, 232, 223),
+      backgroundColor: AppColors.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             // Top Spacing & Search Bar Area
             Padding(
-              padding: const EdgeInsets.only(left: 12, right: 16, top: 20, bottom: 12),
+              padding: const EdgeInsets.only(
+                left: 12,
+                right: 16,
+                top: 20,
+                bottom: 12,
+              ),
               child: Row(
                 children: [
                   // Back Button
@@ -45,7 +51,7 @@ class SearchScreen extends StatelessWidget {
                         color: const Color.fromARGB(255, 249, 246, 241),
                         borderRadius: BorderRadius.circular(25),
                         border: Border.all(
-                          color: const Color(0xFFC85A17).withValues(alpha: 0.3),
+                          color: AppColors.themeColor.withValues(alpha: 0.3),
                           width: 1.2,
                         ),
                         boxShadow: [
@@ -65,7 +71,7 @@ class SearchScreen extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF1E1E1E),
                         ),
-                        cursorColor: const Color(0xFFC85A17),
+                        cursorColor: AppColors.themeColor,
                         decoration: InputDecoration(
                           hintText: 'Search title, category, talks...',
                           hintStyle: TextStyle(
@@ -77,11 +83,13 @@ class SearchScreen extends StatelessWidget {
                             padding: EdgeInsets.symmetric(horizontal: 12),
                             child: Icon(
                               Icons.search_rounded,
-                              color: Color(0xFFC85A17),
+                              color: AppColors.themeColor,
                               size: 22,
                             ),
                           ),
-                          prefixIconConstraints: const BoxConstraints(minWidth: 44),
+                          prefixIconConstraints: const BoxConstraints(
+                            minWidth: 44,
+                          ),
                           suffixIcon: ValueListenableBuilder<TextEditingValue>(
                             valueListenable: controller,
                             builder: (_, value, _) {
@@ -109,7 +117,9 @@ class SearchScreen extends StatelessWidget {
                             },
                           ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                          ),
                         ),
                         onChanged: cubit.search,
                       ),
@@ -133,7 +143,7 @@ class SearchScreen extends StatelessWidget {
                       if (state.isLoading) {
                         return const Center(
                           child: CircularProgressIndicator(
-                            color: Color(0xFFC85A17),
+                            color: AppColors.themeColor,
                           ),
                         );
                       }
@@ -147,7 +157,10 @@ class SearchScreen extends StatelessWidget {
                       }
 
                       return ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         itemCount: state.videos.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 20),
                         itemBuilder: (context, index) {
@@ -182,34 +195,41 @@ class SearchScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                               onTap: navigateToVideo,
                               child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // Thumbnail Box
                                   SizedBox(
-                                    width: 165,
-                                    height: 115,
+                                    width: 175,
+                                    height: 125,
                                     child: Stack(
                                       children: [
                                         Positioned.fill(
                                           child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(18),
-                                            child: video.thumbnail.isNotEmpty &&
-                                                    video.thumbnail.startsWith('http')
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                            child:
+                                                video.thumbnail.isNotEmpty &&
+                                                    video.thumbnail.startsWith(
+                                                      'http',
+                                                    )
                                                 ? Image.network(
                                                     video.thumbnail,
                                                     fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                            error,
-                                                            stackTrace) =>
-                                                        Container(
-                                                      color:
-                                                          Colors.grey.shade300,
-                                                      child: const Icon(
-                                                        Icons.broken_image,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    ),
+                                                    errorBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) => Container(
+                                                          color: Colors
+                                                              .grey
+                                                              .shade300,
+                                                          child: const Icon(
+                                                            Icons.broken_image,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
                                                   )
                                                 : Image.asset(
                                                     video.thumbnail,
@@ -221,50 +241,50 @@ class SearchScreen extends StatelessWidget {
                                           child: Container(
                                             decoration: BoxDecoration(
                                               borderRadius:
-                                                  BorderRadius.circular(18),
+                                                  BorderRadius.circular(20),
                                               gradient: LinearGradient(
                                                 begin: Alignment.topCenter,
                                                 end: Alignment.bottomCenter,
                                                 colors: [
                                                   Colors.transparent,
-                                                  Colors.black
-                                                      .withValues(alpha: 0.25),
+                                                  Colors.black.withValues(
+                                                    alpha: 0.25,
+                                                  ),
                                                 ],
                                               ),
                                             ),
                                           ),
                                         ),
                                         const Positioned(
-                                          left: 8,
-                                          bottom: 8,
+                                          left: 10,
+                                          bottom: 10,
                                           child: DecoratedBox(
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               shape: BoxShape.circle,
                                             ),
                                             child: Padding(
-                                              padding: EdgeInsets.all(5.0),
+                                              padding: EdgeInsets.all(6.0),
                                               child: Icon(
                                                 Icons.play_arrow_rounded,
                                                 color: Colors.black87,
-                                                size: 18,
+                                                size: 20,
                                               ),
                                             ),
                                           ),
                                         ),
                                         if (video.isLive)
                                           Positioned(
-                                            top: 8,
-                                            right: 8,
+                                            top: 10,
+                                            right: 10,
                                             child: Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 2,
-                                              ),
+                                                    horizontal: 7,
+                                                    vertical: 3,
+                                                  ),
                                               decoration: BoxDecoration(
-                                                color:
-                                                    const Color(0xFFE53935),
+                                                color: const Color(0xFFE53935),
                                                 borderRadius:
                                                     BorderRadius.circular(6),
                                                 boxShadow: [
@@ -272,14 +292,12 @@ class SearchScreen extends StatelessWidget {
                                                     color: Colors.black
                                                         .withValues(alpha: 0.2),
                                                     blurRadius: 4,
-                                                    offset:
-                                                        const Offset(0, 1),
+                                                    offset: const Offset(0, 1),
                                                   ),
                                                 ],
                                               ),
                                               child: const Row(
-                                                mainAxisSize:
-                                                    MainAxisSize.min,
+                                                mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   CircleAvatar(
                                                     radius: 3,
@@ -307,40 +325,48 @@ class SearchScreen extends StatelessWidget {
 
                                   const SizedBox(width: 14),
 
-                                  // Details Info
+                                  // Details Info (Starting at top of video)
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          video.title,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF1E1E1E),
-                                            height: 1.25,
-                                            letterSpacing: -0.2,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 4.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            video.title,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFF1E1E1E),
+                                              height: 1.25,
+                                              letterSpacing: -0.2,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        _SearchVideoSubtitle(video: video),
-                                      ],
+                                          const SizedBox(height: 6),
+                                          _SearchVideoSubtitle(video: video),
+                                        ],
+                                      ),
                                     ),
                                   ),
 
                                   const SizedBox(width: 8),
 
-                                  // Navigation Arrow (Vertically Centered)
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 6.0),
-                                    child: Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 16,
-                                      color: Color(0xFF9E9E9E),
+                                  // Navigation Arrow (Middle-Aligned, Size 16)
+                                  const SizedBox(
+                                    height: 125,
+                                    child: Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.only(right: 8.0),
+                                        child: Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 16,
+                                          color: Color(0xFFBDBDBD),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -368,7 +394,8 @@ class _SearchVideoSubtitle extends StatelessWidget {
 
   String _getDuration() {
     if (video.isLive) return "Live";
-    if (video.formattedDuration != null && video.formattedDuration!.isNotEmpty) {
+    if (video.formattedDuration != null &&
+        video.formattedDuration!.isNotEmpty) {
       return video.formattedDuration!;
     }
     if (video.durationMinutes != null && video.durationMinutes! > 0) {
@@ -412,13 +439,13 @@ class _EmptySearchWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFC85A17).withValues(alpha: 0.08),
+              color: AppColors.themeColor.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.search_rounded,
               size: 48,
-              color: Color(0xFFC85A17),
+              color: AppColors.themeColor,
             ),
           ),
           const SizedBox(height: 16),
