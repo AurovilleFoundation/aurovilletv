@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
+import 'package:aurovilletv/ui/live/live_detail_screen.dart';
 import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import '../bloc/explore_bloc.dart';
 
@@ -49,11 +50,17 @@ class ExploreListWidget extends StatelessWidget {
     );
   }
 
-  void _navigateToDetails(BuildContext context, String videoId) {
+  void _navigateToDetails(
+    BuildContext context,
+    VideoModel video, {
+    required bool isLive,
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => VideoDetailsScreen(videoId: videoId),
+        builder: (_) => isLive
+            ? LiveDetailScreen(liveStream: video.toLiveStreamModel())
+            : VideoDetailsScreen(videoId: video.id),
       ),
     );
   }
@@ -92,7 +99,11 @@ class ExploreListWidget extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
-                onTap: () => _navigateToDetails(context, video.id),
+                onTap: () => _navigateToDetails(
+                  context,
+                  video,
+                  isLive: video.isLive || state.selectedCategory == 'Live',
+                ),
                 child: SizedBox(
                   height: 125,
                   child: Row(
@@ -159,7 +170,9 @@ class ExploreListWidget extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(6),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.2),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.2,
+                                        ),
                                         blurRadius: 4,
                                         offset: const Offset(0, 1),
                                       ),
@@ -364,7 +377,8 @@ class _VideoMetaSubtitle extends StatelessWidget {
   const _VideoMetaSubtitle({required this.video});
 
   String _getDuration() {
-    if (video.formattedDuration != null && video.formattedDuration!.isNotEmpty) {
+    if (video.formattedDuration != null &&
+        video.formattedDuration!.isNotEmpty) {
       return video.formattedDuration!;
     }
     if (video.durationMinutes != null && video.durationMinutes! > 0) {
@@ -376,12 +390,15 @@ class _VideoMetaSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String category = (video.category != null && video.category!.isNotEmpty)
+    final String category =
+        (video.category != null && video.category!.isNotEmpty)
         ? video.category!
         : "Documentary";
 
     final String duration = _getDuration();
-    final String subtitle = duration.isNotEmpty ? "$category  •  $duration" : category;
+    final String subtitle = duration.isNotEmpty
+        ? "$category  •  $duration"
+        : category;
 
     return Text(
       subtitle,

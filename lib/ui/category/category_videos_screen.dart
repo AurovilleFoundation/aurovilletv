@@ -37,19 +37,15 @@ class _CategoryVideosScreenState extends State<CategoryVideosScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => LiveDetailScreen(
-            liveStream: video.toLiveStreamModel(),
-          ),
+          builder: (_) =>
+              LiveDetailScreen(liveStream: video.toLiveStreamModel()),
         ),
       );
     } else {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => VideoDetailsScreen(
-            videoId: video.id,
-            video: video,
-          ),
+          builder: (_) => VideoDetailsScreen(videoId: video.id, video: video),
         ),
       );
     }
@@ -75,10 +71,8 @@ class _CategoryVideosScreenState extends State<CategoryVideosScreen> {
     return Image.asset(
       thumbnail,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => Image.asset(
-        'assets/images/video_placeholder.jpg',
-        fit: BoxFit.cover,
-      ),
+      errorBuilder: (context, error, stackTrace) =>
+          Image.asset('assets/images/video_placeholder.jpg', fit: BoxFit.cover),
     );
   }
 
@@ -87,31 +81,25 @@ class _CategoryVideosScreenState extends State<CategoryVideosScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.darkColor),
-          tooltip: "Back",
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           widget.category.name,
           style: const TextStyle(
             color: AppColors.darkColor,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 22,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
       ),
       body: FutureBuilder<List<VideoModel>>(
         future: _videosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.themeColor,
-              ),
+              child: CircularProgressIndicator(color: AppColors.themeColor),
             );
           }
 
@@ -122,11 +110,18 @@ class _CategoryVideosScreenState extends State<CategoryVideosScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.cloud_off_rounded, size: 50, color: Colors.grey),
+                    const Icon(
+                      Icons.cloud_off_rounded,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(height: 12),
                     const Text(
                       "Something went wrong",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -255,7 +250,9 @@ class _CategoryVideosScreenState extends State<CategoryVideosScreen> {
                                       borderRadius: BorderRadius.circular(6),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.2),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.2,
+                                          ),
                                           blurRadius: 4,
                                           offset: const Offset(0, 1),
                                         ),
@@ -350,7 +347,8 @@ class _VideoMetaSubtitle extends StatelessWidget {
   const _VideoMetaSubtitle({required this.video});
 
   String _getDuration() {
-    if (video.formattedDuration != null && video.formattedDuration!.isNotEmpty) {
+    if (video.formattedDuration != null &&
+        video.formattedDuration!.isNotEmpty) {
       return video.formattedDuration!;
     }
     if (video.durationMinutes != null && video.durationMinutes! > 0) {
@@ -362,12 +360,15 @@ class _VideoMetaSubtitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String category = (video.category != null && video.category!.isNotEmpty)
+    final String category =
+        (video.category != null && video.category!.isNotEmpty)
         ? video.category!
         : "Documentary";
 
     final String duration = _getDuration();
-    final String subtitle = duration.isNotEmpty ? "$category  •  $duration" : category;
+    final String subtitle = duration.isNotEmpty
+        ? "$category  •  $duration"
+        : category;
 
     return Text(
       subtitle,
