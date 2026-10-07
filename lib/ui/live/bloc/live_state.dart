@@ -1,4 +1,4 @@
-part of 'live_cubit.dart';
+part of 'live_bloc.dart';
 
 abstract class LiveState extends Equatable {
   const LiveState();
@@ -7,15 +7,15 @@ abstract class LiveState extends Equatable {
   List<Object?> get props => [];
 }
 
-class LiveInitial extends LiveState {
+final class LiveInitial extends LiveState {
   const LiveInitial();
 }
 
-class LiveLoading extends LiveState {
+final class LiveLoading extends LiveState {
   const LiveLoading();
 }
 
-class LiveLoaded extends LiveState {
+final class LiveLoaded extends LiveState {
   final LiveStreamModel liveStream;
 
   const LiveLoaded({required this.liveStream});
@@ -24,11 +24,11 @@ class LiveLoaded extends LiveState {
   List<Object?> get props => [liveStream];
 }
 
-class LiveNoCredentials extends LiveState {
+final class LiveNoCredentials extends LiveState {
   const LiveNoCredentials();
 }
 
-class LiveError extends LiveState {
+final class LiveError extends LiveState {
   final String message;
 
   const LiveError({required this.message});

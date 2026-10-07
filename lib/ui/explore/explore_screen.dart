@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:aurovilletv/data/network/api/video_api_service.dart';
 import 'package:aurovilletv/ui/explore/bloc/explore_bloc.dart';
 import 'package:aurovilletv/ui/explore/search_screen.dart';
-import 'package:aurovilletv/utils/dbmanager.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
 
 import 'widgets/category_tab_widget.dart';
@@ -13,13 +12,8 @@ import 'widgets/explore_list_widget.dart';
 
 class ExploreScreen extends StatelessWidget {
   final VideoApiService apiService;
-  final DBManager dbManager;
 
-  const ExploreScreen({
-    super.key,
-    required this.apiService,
-    required this.dbManager,
-  });
+  const ExploreScreen({super.key, required this.apiService});
 
   @override
   Widget build(BuildContext context) {

@@ -3,13 +3,13 @@ import 'package:aurovilletv/data/di/service_locator.dart';
 import 'package:aurovilletv/data/network/api/video_api_service.dart';
 import 'package:aurovilletv/ui/explore/bloc/explore_bloc.dart';
 import 'package:aurovilletv/ui/explore/cubit/search_cubit.dart';
+import 'package:aurovilletv/ui/home/bloc/home_bloc.dart';
+import 'package:aurovilletv/ui/live/bloc/live_bloc.dart';
 import 'package:aurovilletv/ui/main/bloc/navigation_bloc.dart';
 import 'package:aurovilletv/ui/main/main_screen.dart';
 import 'package:aurovilletv/ui/watchlist/bloc/watchlist_bloc.dart';
 import 'package:aurovilletv/utils/dbmanager.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
-import 'package:aurovilletv/ui/live/cubit/live_cubit.dart';
-import 'package:aurovilletv/ui/home/cubit/home_cubit.dart';
 import 'package:aurovilletv/utils/secure_storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,15 +21,18 @@ class _AppScrollBehavior extends MaterialScrollBehavior {
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.stylus,
-        PointerDeviceKind.trackpad,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.trackpad,
+  };
 
   @override
   Widget buildScrollbar(
-      BuildContext context, Widget child, ScrollableDetails details) {
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
     return child;
   }
 }
@@ -57,16 +60,16 @@ class MyApp extends StatelessWidget {
                 ..add(const LoadWatchList()),
         ),
         BlocProvider(
-          create: (_) => LiveCubit(
+          create: (_) => LiveBloc(
             apiService: getIt<VideoApiService>(),
             secureStorage: getIt<SecureStorageManager>(),
-          ),
+          )..add(const LoadLiveStatus()),
         ),
         BlocProvider(
-          create: (_) => HomeCubit(
+          create: (_) => HomeBloc(
             apiService: getIt<VideoApiService>(),
             dbManager: getIt<DBManager>(),
-          )..loadHomeData(),
+          )..add(const LoadHome()),
         ),
       ],
       child: MaterialApp(

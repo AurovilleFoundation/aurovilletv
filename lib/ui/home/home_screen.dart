@@ -2,7 +2,7 @@ import 'package:aurovilletv/data/models/category_model.dart';
 import 'package:aurovilletv/data/models/home_data_model.dart';
 import 'package:aurovilletv/data/models/video_model.dart';
 import 'package:aurovilletv/ui/category/category_videos_screen.dart';
-import 'package:aurovilletv/ui/home/cubit/home_cubit.dart';
+import 'package:aurovilletv/ui/home/bloc/home_bloc.dart';
 import 'package:aurovilletv/ui/main/bloc/navigation_bloc.dart';
 import 'package:aurovilletv/ui/video_details/video_details_screen.dart';
 import 'package:aurovilletv/ui/widgets/video_placeholder_widget.dart';
@@ -19,7 +19,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
-        child: BlocBuilder<HomeCubit, HomeState>(
+        child: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
             if (state is HomeLoading) {
               return const _HomeLoadingWidget();
@@ -181,7 +181,7 @@ class _HomeErrorWidget extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.read<HomeCubit>().loadHomeData(),
+              onPressed: () => context.read<HomeBloc>().add(const LoadHome()),
               icon: const Icon(Icons.refresh_rounded),
               label: const Text("Retry Connection"),
               style: ElevatedButton.styleFrom(
@@ -207,7 +207,9 @@ class _HomeLoadedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: () => context.read<HomeCubit>().loadHomeData(),
+      onRefresh: () async {
+        context.read<HomeBloc>().add(const RefreshHome());
+      },
       color: AppColors.themeColor,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

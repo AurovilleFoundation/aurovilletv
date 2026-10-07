@@ -1,5 +1,5 @@
 import 'package:aurovilletv/data/models/live_stream_model.dart';
-import 'package:aurovilletv/ui/live/cubit/live_cubit.dart';
+import 'package:aurovilletv/ui/live/bloc/live_bloc.dart';
 import 'package:aurovilletv/ui/live/live_detail_screen.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -23,13 +23,6 @@ class _LiveScreenState extends State<LiveScreen>
       vsync: this,
       duration: const Duration(seconds: 1),
     )..repeat(reverse: true);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final cubit = context.read<LiveCubit>();
-      if (cubit.state is LiveInitial) {
-        cubit.loadLiveStatus();
-      }
-    });
   }
 
   @override
@@ -64,7 +57,8 @@ class _LiveScreenState extends State<LiveScreen>
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: AppColors.darkColor),
             tooltip: "Refresh Status",
-            onPressed: () => context.read<LiveCubit>().loadLiveStatus(),
+            onPressed: () =>
+                context.read<LiveBloc>().add(const RefreshLiveStatus()),
           ),
         ],
         centerTitle: true,
@@ -74,9 +68,9 @@ class _LiveScreenState extends State<LiveScreen>
       body: RefreshIndicator(
         color: AppColors.themeColor,
         onRefresh: () async {
-          await context.read<LiveCubit>().loadLiveStatus();
+          context.read<LiveBloc>().add(const RefreshLiveStatus());
         },
-        child: BlocBuilder<LiveCubit, LiveState>(
+        child: BlocBuilder<LiveBloc, LiveState>(
           builder: (context, state) {
             if (state is LiveLoading || state is LiveInitial) {
               return const Center(
@@ -138,7 +132,8 @@ class _LiveScreenState extends State<LiveScreen>
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => context.read<LiveCubit>().loadLiveStatus(),
+              onPressed: () =>
+                  context.read<LiveBloc>().add(const RefreshLiveStatus()),
               icon: const Icon(Icons.refresh_rounded),
               label: const Text("Refresh Status"),
               style: ElevatedButton.styleFrom(
@@ -193,7 +188,8 @@ class _LiveScreenState extends State<LiveScreen>
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => context.read<LiveCubit>().loadLiveStatus(),
+              onPressed: () =>
+                  context.read<LiveBloc>().add(const RefreshLiveStatus()),
               icon: const Icon(Icons.refresh_rounded),
               label: const Text("Retry Connection"),
               style: ElevatedButton.styleFrom(

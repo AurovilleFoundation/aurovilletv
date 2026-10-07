@@ -6,7 +6,6 @@ import 'package:aurovilletv/ui/live/live_screen.dart';
 import 'package:aurovilletv/ui/main/bloc/navigation_bloc.dart';
 import 'package:aurovilletv/ui/main/widgets/bottom_navbar_widget.dart';
 import 'package:aurovilletv/ui/watchlist/watchlist_screen.dart';
-import 'package:aurovilletv/utils/dbmanager.dart';
 import 'package:aurovilletv/utils/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,10 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> pages = [
     const HomeScreen(),
     const LiveScreen(),
-    ExploreScreen(
-      dbManager: getIt<DBManager>(),
-      apiService: getIt<VideoApiService>(),
-    ),
+    ExploreScreen(apiService: getIt<VideoApiService>()),
     const WatchlistScreen(),
   ];
 
@@ -50,7 +46,8 @@ class _MainScreenState extends State<MainScreen> {
             // If already on Home tab, require double-press to exit to avoid accidental exits
             final now = DateTime.now();
             if (_lastBackPressTime == null ||
-                now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+                now.difference(_lastBackPressTime!) >
+                    const Duration(seconds: 2)) {
               _lastBackPressTime = now;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
