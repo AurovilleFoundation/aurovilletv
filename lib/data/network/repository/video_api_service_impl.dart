@@ -9,18 +9,17 @@ import '../../models/live_stream_model.dart';
 
 class VideoApiServiceImpl implements VideoApiService {
   final DioClient dioClient;
-  static const String baseUrl = "https://aiis.auroville.org/api/method/register_of_residence.media.api.atv";
+  static const String baseUrl =
+      "https://aiis.auroville.org/api/method/register_of_residence.media.api.atv";
 
   VideoApiServiceImpl({required this.dioClient});
 
   Dio get _dio => dioClient.dio;
 
   Map<String, String> _getHeaders() {
-    final apiKey = dotenv.env['LIVE_API_KEY'] ?? 'ecadacc37f4fd48';
-    final apiSecret = dotenv.env['LIVE_API_SECRET'] ?? '278a8eda422a329';
-    return {
-      "Authorization": "token $apiKey:$apiSecret",
-    };
+    final apiKey = dotenv.env['LIVE_API_KEY'] ?? '';
+    final apiSecret = dotenv.env['LIVE_API_SECRET'] ?? '';
+    return {"Authorization": "token $apiKey:$apiSecret"};
   }
 
   // ---------------- All Videos ----------------
@@ -70,20 +69,21 @@ class VideoApiServiceImpl implements VideoApiService {
 
   // ---------------- Live Stream (Continuous 24/7 + API status) ----------------
   @override
-  Future<LiveStreamModel> getLiveStream({required String apiKey, required String apiSecret}) async {
+  Future<LiveStreamModel> getLiveStream({
+    required String apiKey,
+    required String apiSecret,
+  }) async {
     try {
       final response = await _dio.get(
         "https://aiis.auroville.org/api/method/register_of_residence.media.api.atv.live",
         options: Options(
-          headers: {
-            "Authorization": "token $apiKey:$apiSecret",
-          },
+          headers: {"Authorization": "token $apiKey:$apiSecret"},
         ),
       );
 
       final data = response.data;
       Map<String, dynamic>? dataMap;
-      
+
       if (data is Map<String, dynamic>) {
         if (data['data'] is Map<String, dynamic>) {
           dataMap = data['data'] as Map<String, dynamic>?;
@@ -106,14 +106,14 @@ class VideoApiServiceImpl implements VideoApiService {
         final publishDate = (dataMap['publish_date'] ?? '') as String;
 
         final rawViewCount = dataMap['view_count'];
-        final viewerCount = rawViewCount is num
-            ? rawViewCount.toInt()
-            : 0;
+        final viewerCount = rawViewCount is num ? rawViewCount.toInt() : 0;
 
         // Auroville TV broadcasts 24/7 on its official HLS education stream.
         // If the API specifies a custom live stream URL, use it. Otherwise, fallback to the 24/7 stream.
         const defaultStreamUrl = "https://aurovilletv.com/hls/education.m3u8";
-        final streamUrl = rawVideoUrl.trim().isNotEmpty ? rawVideoUrl.trim() : defaultStreamUrl;
+        final streamUrl = rawVideoUrl.trim().isNotEmpty
+            ? rawVideoUrl.trim()
+            : defaultStreamUrl;
 
         return LiveStreamModel(
           status: "Live",
@@ -147,7 +147,9 @@ class VideoApiServiceImpl implements VideoApiService {
       if (data is Map<String, dynamic> && data.containsKey('message')) {
         final message = data['message'];
         if (message is Map<String, dynamic> && message.containsKey('data')) {
-          return VideoModel.fromApi(Map<String, dynamic>.from(message['data'] as Map));
+          return VideoModel.fromApi(
+            Map<String, dynamic>.from(message['data'] as Map),
+          );
         }
       }
       throw Exception("Video not found");
@@ -181,7 +183,9 @@ class VideoApiServiceImpl implements VideoApiService {
       if (data is Map<String, dynamic> && data.containsKey('message')) {
         final message = data['message'];
         if (message is Map<String, dynamic> && message.containsKey('data')) {
-          return HomeDataModel.fromMap(Map<String, dynamic>.from(message['data'] as Map));
+          return HomeDataModel.fromMap(
+            Map<String, dynamic>.from(message['data'] as Map),
+          );
         }
       }
       throw Exception("Invalid API response format");
@@ -266,7 +270,9 @@ class VideoApiServiceImpl implements VideoApiService {
     }
 
     if (items is List) {
-      return items.map((e) => VideoModel.fromMap(Map<String, dynamic>.from(e as Map))).toList();
+      return items
+          .map((e) => VideoModel.fromMap(Map<String, dynamic>.from(e as Map)))
+          .toList();
     }
 
     return [];

@@ -37,8 +37,8 @@ class LiveBloc extends Bloc<LiveEvent, LiveState> {
           apiSecret == null ||
           apiKey.trim().isEmpty ||
           apiSecret.trim().isEmpty) {
-        final envKey = dotenv.env['LIVE_API_KEY'] ?? 'ecadacc37f4fd48';
-        final envSecret = dotenv.env['LIVE_API_SECRET'] ?? '278a8eda422a329';
+        final envKey = dotenv.env['LIVE_API_KEY'] ?? '';
+        final envSecret = dotenv.env['LIVE_API_SECRET'] ?? '';
         apiKey = envKey.trim();
         apiSecret = envSecret.trim();
         await secureStorage.updateValue(apiKeyStoreKey, apiKey);
